@@ -1,0 +1,166 @@
+# SafeBuddy
+
+> **Learn your rights. Find your voice. Grow with confidence.**
+
+SafeBuddy is a child-friendly, gamified learning platform for children's rights awareness and introductory legal literacy in India. It translates the project proposal into a functional MERN-style MVP with short lessons, friendly quizzes, progress tracking, XP, badges, a leaderboard, and an admin content workspace.
+
+![SafeBuddy stack](https://img.shields.io/badge/Stack-React%20%2B%20Express%20%2B%20MongoDB-5B5CE2?style=flat-square) ![Audience](https://img.shields.io/badge/Audience-Children%20%26%20young%20learners-1D9E75?style=flat-square) ![Status](https://img.shields.io/badge/Status-MVP-E6A535?style=flat-square)
+
+## Why it exists
+
+The project brief identifies a gap in children's ability to understand their rights and legal protections. SafeBuddy approaches that gap through approachable, age-appropriate learning experiences rather than dense legal text.
+
+The starter curriculum covers:
+
+- **Right to Education** — learning, inclusion, and being heard at school
+- **Personal safety and trusted help** — boundaries, trusted adults, POCSO awareness, and emergency signposting
+- **Safe childhood** — school, play, child-labour awareness, and respectful action
+- **Care, fairness, and fresh starts** — the child-centred principles behind juvenile justice and protection
+
+> **Important:** SafeBuddy is an educational prototype, not a substitute for legal advice, safeguarding services, professional counselling, or emergency support. In an immediate emergency in India, call **112** and seek help from a trusted adult.
+
+## Features
+
+### Learner experience
+
+- Friendly landing page and secure registration/sign-in flow
+- Four starter lessons with collapsible, easy-to-read learning sections
+- Quiz flow that does not expose answers before submission
+- Score feedback with explanations for every answer
+- XP, streaks, completion tracking, and achievement badges
+- Encouraging leaderboard designed to celebrate progress rather than competition
+- Personal learning journey with recent quiz activity
+- Responsive layout for desktop and mobile
+
+### Admin experience
+
+- Dedicated guide/admin workspace
+- View published learning content
+- Publish a new lesson with a first learning section
+- Publish a quiz question attached to an existing lesson
+- Child-first content guidance inside the workspace
+
+### Technical highlights
+
+- React + Vite frontend with React Router
+- Express REST API with JWT-based auth and role checks
+- MongoDB/Mongoose schemas for users, lessons, quizzes, and attempts
+- **Zero-setup demo mode:** if `MONGO_URI` is absent, the API uses a local generated JSON store so the whole platform still works immediately
+- MongoDB auto-seeding for the same starter content when `MONGO_URI` is configured
+- Protected routes, password hashing with bcrypt, Helmet, CORS, and input validation
+
+## Quick start
+
+### Prerequisites
+
+- Node.js 20+ and npm
+- Optional: MongoDB 7+ (or a MongoDB Atlas connection string) for database-backed persistence
+
+### Installation
+
+```bash
+git clone https://github.com/YOUR-USERNAME/safebuddy.git
+cd safebuddy
+npm run install:all
+```
+
+Create `server/.env` from the example:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Start the client and API together:
+
+```bash
+npm run dev
+```
+
+- Client: `http://localhost:5173`
+- API health check: `http://localhost:5000/api/health`
+
+### Demo accounts
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Learner | `aarav@example.com` | `Learn@123` |
+| Admin | `admin@safebuddy.in` | `Admin@123` |
+
+The learner sign-in screen also includes a **Use learner demo account** shortcut.
+
+## Database modes
+
+### Local demo mode (default)
+
+No database configuration is required. When the server starts without `MONGO_URI`, it generates `server/data/demo-db.json` with starter content and demo users. This file is intentionally ignored by Git.
+
+### MongoDB mode
+
+Set `MONGO_URI` in `server/.env`:
+
+```dotenv
+PORT=5000
+JWT_SECRET=use-a-long-unique-random-secret
+MONGO_URI=mongodb://127.0.0.1:27017/safebuddy
+CLIENT_ORIGIN=http://localhost:5173
+```
+
+On its first connection to an empty database, the API seeds the four lessons, their quizzes, and the demo accounts automatically.
+
+## Project structure
+
+```text
+safebuddy/
+├── client/                  # React + Vite interface
+│   └── src/
+│       ├── components/      # Navigation, protected routes, reusable UI
+│       ├── contexts/        # Authentication state
+│       ├── pages/           # Learner and admin views
+│       └── utils/           # API client
+├── server/                  # Express API
+│   └── src/
+│       ├── middleware/      # JWT and role guards
+│       ├── models/          # Mongoose schemas
+│       ├── routes/          # Auth, lessons, quizzes, progress
+│       └── services/        # Seed content and storage repository
+├── docs/                    # Product brief and architecture notes
+├── .env.example
+└── package.json
+```
+
+## API overview
+
+| Area | Route | Access |
+| --- | --- | --- |
+| Auth | `POST /api/auth/register`, `POST /api/auth/login` | Public |
+| Current user | `GET /api/auth/me` | Signed-in user |
+| Lessons | `GET /api/lessons`, `GET /api/lessons/:id` | Public API / app token |
+| Lesson authoring | `POST /api/lessons`, `PATCH /api/lessons/:id` | Admin |
+| Lesson quiz | `GET /api/quizzes/lesson/:lessonId` | Signed-in learner |
+| Quiz submit | `POST /api/quizzes/:quizId/submit` | Signed-in learner |
+| Learning progress | `GET /api/progress/me` | Signed-in learner |
+| Leaderboard | `GET /api/progress/leaderboard` | Signed-in learner |
+
+## Validation performed
+
+```bash
+npm run build --prefix client
+```
+
+The API has also been manually smoke-tested for health, demo login, lesson retrieval, non-leaking quiz retrieval, quiz submission, progress updates, and leaderboard retrieval.
+
+## Notes for a production release
+
+This academic MVP provides a strong functional starting point. Before a public release, add:
+
+1. Expert legal and child-safeguarding review of every content item, translated string, and external support number.
+2. A verified age-assurance, parental-consent, privacy, moderation, incident-response, and data-retention design.
+3. Rate limiting, CSRF strategy where relevant, audit logging, stronger production validation, tests, and monitoring.
+4. A dedicated CMS/question editor that supports multi-question quiz editing, draft review, publishing workflow, and versioning.
+5. Accessibility testing with real learners, educators, and diverse language communities; then add approved multilingual translations.
+
+## Source material
+
+This implementation is based on the supplied **SafeBuddy – Weekly Work Distribution** document. It reflects its stated project aim, MERN architecture direction, gamification goals (quizzes, badges, leaderboards, storytelling), child-rights topics, learning progress/reporting requirements, and learner/admin scope.
+
+See [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the project traceability and technical design.
