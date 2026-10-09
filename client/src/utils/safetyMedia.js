@@ -1,17 +1,18 @@
 // Spoken safety clips (generated voice, stored in client/public/audio)
 // and YouTube videos (embedded via YouTube's official player; nothing is downloaded).
-// Video titles/channels were checked against YouTube's oEmbed endpoint.
+// All content is India-specific: Indian laws, Indian helplines, and Indian channels/makers.
+// Video IDs were checked against YouTube's oEmbed endpoint.
 
 export const safetyClips = {
-  learn: { src: '/audio/safety-01-learn.mp3', title: 'Every child can learn' },
-  body: { src: '/audio/safety-02-body.mp3', title: 'Your body belongs to you' },
+  learn: { src: '/audio/safety-01-learn.mp3', title: 'Every child can learn (India’s RTE Act)' },
+  body: { src: '/audio/safety-02-body.mp3', title: 'Your body belongs to you (POCSO Act)' },
   unsafe: { src: '/audio/safety-03-unsafe.mp3', title: 'If you feel unsafe' },
-  online: { src: '/audio/safety-04-online.mp3', title: 'Staying safe online' },
+  online: { src: '/audio/safety-04-online.mp3', title: 'Staying safe online (cybercrime 1930)' },
   secrets: { src: '/audio/safety-05-secrets.mp3', title: 'Secrets that feel wrong' },
   stranger: { src: '/audio/safety-06-stranger.mp3', title: 'Strangers' },
   helpers: { src: '/audio/safety-07-helpers.mp3', title: 'Trusted helpers' },
-  emergency: { src: '/audio/safety-08-emergency.mp3', title: 'Who to call for help' },
-  fairness: { src: '/audio/safety-09-fairness.mp3', title: 'Fairness and fresh starts' },
+  emergency: { src: '/audio/safety-08-emergency.mp3', title: 'Who to call for help in India' },
+  fairness: { src: '/audio/safety-09-fairness.mp3', title: 'Fairness and fresh starts (Juvenile Justice Act)' },
   games: { src: '/audio/safety-10-games.mp3', title: 'Games: think before you act' },
 };
 
@@ -19,30 +20,30 @@ export const lessonMedia = {
   'right-to-learn': {
     clips: [safetyClips.learn, safetyClips.emergency],
     videos: [
-      { id: 'TafvHxXFzUM', title: 'Rights and responsibilities of children', channel: 'Smile and Learn' },
-      { id: 'y_2nA49p3yw', title: 'The UN Convention on the Rights of the Child (animation)', channel: 'cradub' },
+      { id: 'M9HocXB_T0k', title: 'Right to Education Act (RTE), 2009 — explained', channel: "Let's LEARN" },
+      { id: '8NQvL8oDIEA', title: 'The Right of Children to Free & Compulsory Education Act', channel: 'UNICEF India' },
     ],
   },
   'personal-safety': {
     clips: [safetyClips.body, safetyClips.stranger, safetyClips.helpers],
     videos: [
-      { id: 'xSTS9WahLMw', title: 'STOP! When touching isn’t safe!', channel: 'Fresberg Cartoon' },
-      { id: 'Tg4z2aO48RE', title: 'Good touch, bad touch for kids', channel: 'Edukidzium' },
-      { id: 'zNTUMNKSNwk', title: 'Protect Yourself Rules: safe touch / unsafe touch', channel: 'Fight Child Abuse' },
+      { id: '3WyHuHspbjk', title: 'KOMAL — a film on safe and unsafe touch (English)', channel: 'CBSE Channel (Ministry of Women & Child Development film)' },
+      { id: 'eilEBbOAAcc', title: 'Good touch and bad touch — safety for kids', channel: 'Buddhu Baksa (with 94.3 MY FM RJ Viny)' },
+      { id: '3G2Vdb6W0-E', title: 'CHILDLINE 1098 — new procedure for parents (Tamil)', channel: 'Common Man' },
     ],
   },
   'safe-childhood': {
     clips: [safetyClips.online, safetyClips.secrets],
     videos: [
-      { id: 'CqH2QYt6oOc', title: 'Safety tips for kids', channel: 'learning junction' },
-      { id: 'r4BnCGAIj5E', title: 'Red flag secrets', channel: 'I Said No!' },
-      { id: 'GmW1-60Wdfo', title: 'Learn to be safe: my body belongs to me', channel: 'Act for Kids' },
+      { id: 'KAnKujVDjf4', title: '1930 — short film on cybercrime awareness', channel: 'Vanitaa Pande' },
+      { id: '--C0JJwXIyg', title: 'POCSO Act explained: the child safety law every Indian must know', channel: 'Misfit Humans' },
     ],
   },
   'care-and-justice': {
     clips: [safetyClips.fairness],
     videos: [
-      { id: 'y_2nA49p3yw', title: 'The UN Convention on the Rights of the Child (animation)', channel: 'cradub' },
+      { id: '3G2Vdb6W0-E', title: 'CHILDLINE 1098 — new procedure for parents (Tamil)', channel: 'Common Man' },
+      { id: '--C0JJwXIyg', title: 'POCSO Act explained: the child safety law every Indian must know', channel: 'Misfit Humans' },
     ],
   },
 };
@@ -55,6 +56,6 @@ export const gameMedia = {
 
 // Shown below the Play page game cards.
 export const playSoundVideos = [
-  { id: 'LZE3LEl-Fj0', title: 'My body is MY body', channel: 'Educate2Empower Publishing' },
-  { id: 'a-5mdt9YN6I', title: 'My Body Belongs To Me (animated short film)', channel: 'CultureOfSilenceFilm' },
+  { id: '3WyHuHspbjk', title: 'KOMAL — a film on safe and unsafe touch (English)', channel: 'CBSE Channel (Ministry of Women & Child Development film)' },
+  { id: 'eilEBbOAAcc', title: 'Good touch and bad touch — safety for kids', channel: 'Buddhu Baksa (with 94.3 MY FM RJ Viny)' },
 ];
