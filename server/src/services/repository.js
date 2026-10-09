@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
-import sqlite3 from 'sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import User from '../models/User.js';
 import Lesson from '../models/Lesson.js';
 import Quiz from '../models/Quiz.js';
@@ -95,18 +95,13 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_attempts_user ON attempts(userId, createdAt);
 `;
 
-const run = (sql, params = []) => new Promise((resolve, reject) => {
-  sqliteDb.run(sql, params, function onRun(error) { error ? reject(error) : resolve(this); });
-});
-const get = (sql, params = []) => new Promise((resolve, reject) => {
-  sqliteDb.get(sql, params, (error, row) => (error ? reject(error) : resolve(row)));
-});
-const all = (sql, params = []) => new Promise((resolve, reject) => {
-  sqliteDb.all(sql, params, (error, rows) => (error ? reject(error) : resolve(rows)));
-});
-const exec = (sql) => new Promise((resolve, reject) => {
-  sqliteDb.exec(sql, (error) => (error ? reject(error) : resolve()));
-});
+// Thin async wrappers over Node's built-in SQLite (node:sqlite). Keeps the same call shape the
+// repository used with the sqlite3 package. Every call is synchronous underneath, so no
+// native addon needs to be downloaded or compiled.
+const run = async (sql, params = []) => sqliteDb.prepare(sql).run(...params);
+const get = async (sql, params = []) => sqliteDb.prepare(sql).get(...params) ?? null;
+const all = async (sql, params = []) => sqliteDb.prepare(sql).all(...params);
+const exec = async (sql) => sqliteDb.exec(sql);
 
 const parseJson = (value, fallback) => {
   if (value === null || value === undefined) return fallback;
@@ -264,9 +259,7 @@ async function migrateSqlite() {
 
 async function openSqlite() {
   await fs.mkdir(path.dirname(sqlitePath), { recursive: true });
-  sqliteDb = await new Promise((resolve, reject) => {
-    const connection = new sqlite3.Database(sqlitePath, (error) => (error ? reject(error) : resolve(connection)));
-  });
+  sqliteDb = new DatabaseSync(sqlitePath);
   await run('PRAGMA foreign_keys = ON');
   await run('PRAGMA journal_mode = WAL');
   await exec(SCHEMA);
