@@ -8,7 +8,7 @@ React + Vite browser client
          ▼
 Express API ── JWT middleware ── role guard
          │
-         ├── JSON demo repository (default, no setup)
+         ├── SQLite repository (default, no setup)
          └── Mongoose / MongoDB repository (when MONGO_URI is set)
 ```
 
@@ -16,7 +16,7 @@ Express API ── JWT middleware ── role guard
 
 ### Client
 
-- **Pages:** landing, authentication, dashboard, lesson library, lesson reader, quiz, leaderboard, profile, and admin guide space.
+- **Pages:** landing, authentication, dashboard (Home), lesson library (Learn), lesson reader, quiz, safety games (Play), profile (My journey), and admin guide space.
 - **Auth context:** stores the JWT in local storage, restores a session through `/api/auth/me`, and exposes login/register/logout utilities.
 - **API utility:** centralises same-origin `/api` requests with bearer tokens.
 - **Route protection:** redirects signed-out users to sign-in and prevents non-admin users from entering the Guide Space.
@@ -26,8 +26,10 @@ Express API ── JWT middleware ── role guard
 - **Auth routes:** registration, login, and current user retrieval.
 - **Lesson routes:** retrieve published lesson content; admin creation and updating.
 - **Quiz routes:** retrieve a sanitised quiz without answer keys; score submitted answers only on the server; update XP, badges, and completion.
-- **Progress routes:** learner progress, attempt history, and ordered leaderboard.
-- **Repository service:** provides a consistent data interface for either the local JSON demo store or MongoDB.
+- **Progress routes:** learner progress and attempt history.
+- **Game routes:** game catalogue and completion. XP is awarded once per game.
+- **Rewards service:** pure XP, streak, and badge rules, covered by unit tests in `server/test`.
+- **Repository service:** provides a consistent data interface for either the local SQLite database or MongoDB.
 
 ## Data model
 
@@ -38,7 +40,7 @@ Express API ── JWT middleware ── role guard
 | Quiz | external ID, lesson ID, XP reward, questions, options, correct answer index, explanations |
 | Attempt | user ID, quiz ID, lesson ID, score, total, submitted choices, timestamp |
 
-`externalId` keeps the demo JSON and MongoDB route contracts consistent. The client never receives a password hash; quiz answers are stripped from the read endpoint and are evaluated on the server during submission.
+`externalId` keeps the SQLite and MongoDB route contracts consistent. The client never receives a password hash; quiz answers are stripped from the read endpoint and are evaluated on the server during submission.
 
 ## Security choices in the MVP
 

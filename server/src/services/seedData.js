@@ -62,7 +62,7 @@ export const quizzes = [
 
 export const starterUsers = [
   { id: 'admin-safebuddy', name: 'SafeBuddy Guide', email: 'admin@safebuddy.in', role: 'admin', avatar: '🧭', xp: 0, streak: 0, completedLessonIds: [], badges: [] },
-  { id: 'learner-aarav', name: 'Aarav Kumar', email: 'aarav@example.com', role: 'learner', avatar: '🦊', xp: 145, streak: 3, completedLessonIds: ['right-to-learn', 'personal-safety'], badges: [{ key: 'first-step', title: 'First Step', icon: '🌟', earnedAt: new Date().toISOString() }, { key: 'safety-scout', title: 'Safety Scout', icon: '🛡️', earnedAt: new Date().toISOString() }] },
-  { id: 'learner-meera', name: 'Meera Iyer', email: 'meera@example.com', role: 'learner', avatar: '🐼', xp: 120, streak: 2, completedLessonIds: ['right-to-learn', 'safe-childhood'], badges: [{ key: 'first-step', title: 'First Step', icon: '🌟', earnedAt: new Date().toISOString() }] },
-  { id: 'learner-kabir', name: 'Kabir Shah', email: 'kabir@example.com', role: 'learner', avatar: '🐯', xp: 95, streak: 1, completedLessonIds: ['right-to-learn'], badges: [{ key: 'first-step', title: 'First Step', icon: '🌟', earnedAt: new Date().toISOString() }] }
+  { id: 'learner-aarav', name: 'Aarav Kumar', email: 'aarav@example.com', role: 'learner', avatar: '🦊', xp: 0, streak: 0, completedLessonIds: [], badges: [] },
+  { id: 'learner-meera', name: 'Meera Iyer', email: 'meera@example.com', role: 'learner', avatar: '🐼', xp: 0, streak: 0, completedLessonIds: [], badges: [] },
+  { id: 'learner-kabir', name: 'Kabir Shah', email: 'kabir@example.com', role: 'learner', avatar: '🐯', xp: 0, streak: 0, completedLessonIds: [], badges: [] }
 ];

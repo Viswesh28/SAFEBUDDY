@@ -9,6 +9,7 @@ import authRouter from './routes/auth.js';
 import lessonsRouter from './routes/lessons.js';
 import quizzesRouter from './routes/quizzes.js';
 import progressRouter from './routes/progress.js';
+import gamesRouter from './routes/games.js';
 import { initialiseRepository, repositoryMode } from './services/repository.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/lessons', lessonsRouter);
 app.use('/api/quizzes', quizzesRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/games', gamesRouter);
+
+app.use('/api', (req, res) => res.status(404).json({ message: 'This API route does not exist.' }));
 
 const clientDist = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientDist));

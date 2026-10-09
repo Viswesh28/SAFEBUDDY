@@ -6,3 +6,7 @@ coverage/
 .DS_Store
 client/dist/
 server/data/*.local.json
+
+# SQLite database (generated on first start)
+server/data/*.sqlite
+server/data/*.sqlite-*

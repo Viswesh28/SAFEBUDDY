@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   xp: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
   completedLessonIds: [{ type: String }],
+  completedGameIds: [{ type: String }],
   badges: [badgeSchema],
   lastActiveAt: Date
 }, { timestamps: true });

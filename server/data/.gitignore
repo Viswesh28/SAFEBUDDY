@@ -1,2 +1,3 @@
-# Demo data is generated automatically on first server start.
-demo-db.json
+# SQLite database files are generated automatically on first server start.
+*.sqlite
+*.sqlite-*

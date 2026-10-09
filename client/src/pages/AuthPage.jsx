@@ -10,7 +10,8 @@ export default function AuthPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', avatar: '🌟' });
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   const navigate = useNavigate(); const location = useLocation();
-  const redirect = location.state?.from || '/dashboard';
+  // Admins land in the Guide Space; learners go to their dashboard unless they were sent to a page first.
+  const redirect = location.state?.from || (user?.role === 'admin' ? '/admin' : '/dashboard');
   if (user) return <Navigate to={redirect} replace />;
   const switchMode = (isRegister) => { setError(''); setSearchParams(isRegister ? { mode: 'register' } : {}); };
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));

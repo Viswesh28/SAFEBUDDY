@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 const nav = [
   { to: '/dashboard', icon: '⌂', label: 'Home' },
   { to: '/learn', icon: '◈', label: 'Learn' },
-  { to: '/leaderboard', icon: '♛', label: 'Leaders' },
+  { to: '/games', icon: '🎮', label: 'Play' },
   { to: '/profile', icon: '◌', label: 'My journey' }
 ];
 
@@ -30,6 +30,6 @@ export default function AppLayout() {
       <NavLink to="/profile" className="profile-chip"><span className="avatar">{user?.avatar || '🌟'}</span><span className="profile-chip__text"><b>{user?.name?.split(' ')[0]}</b><small>{user?.role === 'admin' ? 'Guide' : 'Learner'}</small></span></NavLink>
     </header>
     <main className="page-content"><Outlet /></main>
-    <nav className="bottom-nav">{items.slice(0, 4).map((item) => <NavLink key={item.to} to={item.to} className="bottom-nav__link"><span>{item.icon}</span><small>{item.label}</small></NavLink>)}</nav>
+    <nav className="bottom-nav">{items.slice(0, 5).map((item) => <NavLink key={item.to} to={item.to} className="bottom-nav__link"><span>{item.icon}</span><small>{item.label}</small></NavLink>)}</nav>
   </div>;
 }

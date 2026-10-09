@@ -2,7 +2,7 @@
 
 > **Learn your rights. Find your voice. Grow with confidence.**
 
-SafeBuddy is a child-friendly, gamified learning platform for children's rights awareness and introductory legal literacy in India. It translates the project proposal into a functional MERN-style MVP with short lessons, friendly quizzes, progress tracking, XP, badges, a leaderboard, and an admin content workspace.
+SafeBuddy is a child-friendly, gamified learning platform for children's rights awareness and introductory legal literacy in India. It translates the project proposal into a functional MERN-style MVP with short lessons, friendly quizzes, progress tracking, XP, badges, interactive safety games, and an admin content workspace.
 
 ![SafeBuddy stack](https://img.shields.io/badge/Stack-React%20%2B%20Express%20%2B%20MongoDB-5B5CE2?style=flat-square) ![Audience](https://img.shields.io/badge/Audience-Children%20%26%20young%20learners-1D9E75?style=flat-square) ![Status](https://img.shields.io/badge/Status-MVP-E6A535?style=flat-square)
 
@@ -27,8 +27,8 @@ The starter curriculum covers:
 - Four starter lessons with collapsible, easy-to-read learning sections
 - Quiz flow that does not expose answers before submission
 - Score feedback with explanations for every answer
-- XP, streaks, completion tracking, and achievement badges
-- Encouraging leaderboard designed to celebrate progress rather than competition
+- XP, streaks, completion tracking, and achievement badges (see [XP and rewards](#xp-and-rewards))
+- Three interactive safety games: *Safe or Not?*, *Trusted Helper Match*, and *Safe Path Maze* (see [Safety games](#safety-games))
 - Personal learning journey with recent quiz activity
 - Responsive layout for desktop and mobile
 
@@ -45,7 +45,7 @@ The starter curriculum covers:
 - React + Vite frontend with React Router
 - Express REST API with JWT-based auth and role checks
 - MongoDB/Mongoose schemas for users, lessons, quizzes, and attempts
-- **Zero-setup demo mode:** if `MONGO_URI` is absent, the API uses a local generated JSON store so the whole platform still works immediately
+- **Zero-setup demo mode:** if `MONGO_URI` is absent, the API uses a local SQLite database (created automatically) so the whole platform still works immediately
 - MongoDB auto-seeding for the same starter content when `MONGO_URI` is configured
 - Protected routes, password hashing with bcrypt, Helmet, CORS, and input validation
 
@@ -90,9 +90,9 @@ The learner sign-in screen also includes a **Use learner demo account** shortcut
 
 ## Database modes
 
-### Local demo mode (default)
+### Local SQLite mode (default)
 
-No database configuration is required. When the server starts without `MONGO_URI`, it generates `server/data/demo-db.json` with starter content and demo users. This file is intentionally ignored by Git.
+No database configuration is required. When the server starts without `MONGO_URI`, it creates `server/data/safebuddy.sqlite` (SQLite) with starter content and demo users. The file is intentionally ignored by Git; set `SQLITE_PATH` to change its location.
 
 ### MongoDB mode
 
@@ -106,6 +106,36 @@ CLIENT_ORIGIN=http://localhost:5173
 ```
 
 On its first connection to an empty database, the API seeds the four lessons, their quizzes, and the demo accounts automatically.
+
+## XP and rewards
+
+All XP rules are enforced on the server (`server/src/services/rewards.js`).
+
+| Action | XP |
+| --- | --- |
+| First attempt at a lesson quiz | +5 (participation) |
+| First time you pass a lesson quiz | + the quiz's XP reward (default 30) |
+| Repeating a quiz or a passed lesson | 0 |
+| First completion of each safety game | +25 to +30 (per game) |
+| Replaying a safety game | 0 |
+
+Streaks count days in Indian Standard Time. Activity on the next day adds one to the streak, and a missed day resets it to 1.
+
+Badges: First Step, Safety Scout, Sharp Thinker, Rights Champion, Game Explorer (first game), and Game Master (all games).
+
+## Safety games
+
+Open **Play** in the learner menu. Each game is a short, original activity:
+
+- **Safe or Not?** Decide whether everyday situations are safe, not safe, or need a trusted adult.
+- **Trusted Helper Match.** Choose the right person or helpline for each worry. It includes CHILDLINE 1098 and 112.
+- **Safe Path Maze.** Guide your buddy home using the arrow keys, WASD, or on-screen buttons. Collect trusted helpers and avoid risky spots, which cost a heart.
+
+Games are for practice. The server records each completion, awards XP only the first time, and checks the reported score against the game total.
+
+## Open-source credits
+
+SafeBuddy is built with open-source software: React, Vite, React Router, Express, SQLite (`sqlite3`), Mongoose, bcryptjs, jsonwebtoken, Helmet, and canvas-confetti (ISC). The game designs and scenarios are original to SafeBuddy. For further child-safety learning, the open-source [KSG Kid-Safe Games](https://github.com/CaptainLWS/KSG_Kid-Safe-Games) catalogue (MIT) and [eduActiv8](https://www.eduactiv8.org/) (open source) are good places to explore.
 
 ## Project structure
 
@@ -139,7 +169,8 @@ safebuddy/
 | Lesson quiz | `GET /api/quizzes/lesson/:lessonId` | Signed-in learner |
 | Quiz submit | `POST /api/quizzes/:quizId/submit` | Signed-in learner |
 | Learning progress | `GET /api/progress/me` | Signed-in learner |
-| Leaderboard | `GET /api/progress/leaderboard` | Signed-in learner |
+| Games catalogue | `GET /api/games` | Signed-in learner |
+| Complete a game | `POST /api/games/:gameId/complete` | Signed-in learner |
 
 ## Validation performed
 
@@ -147,7 +178,13 @@ safebuddy/
 npm run build --prefix client
 ```
 
-The API has also been manually smoke-tested for health, demo login, lesson retrieval, non-leaking quiz retrieval, quiz submission, progress updates, and leaderboard retrieval.
+Automated checks:
+
+```bash
+npm test --prefix server   # XP, streak, badge and game-reward rules (unit tests)
+```
+
+The API and the browser UI have also been exercised end to end: sign-in for learner and admin, lesson reading, quiz scoring and XP, game completion and replay rules, badges, progress pages, admin quiz additions, and the removed leaderboard route.
 
 ## Notes for a production release
 
