@@ -53,7 +53,7 @@ The starter curriculum covers:
 
 ### Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 22.13+ (or 24 LTS) and npm — the server uses Node's built-in SQLite, so no native build step is needed
 - Optional: MongoDB 7+ (or a MongoDB Atlas connection string) for database-backed persistence
 
 ### Installation
