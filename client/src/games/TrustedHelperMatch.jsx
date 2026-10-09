@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from '../components/Icon';
 
 // Each round pairs a worry with the best next step.
 // Helplines: CHILDLINE 1098 (free, 24 hours, India) and 112 (emergency number, India).
@@ -27,9 +28,9 @@ export default function TrustedHelperMatch({ onFinish }) {
   const correct = picked === round.answer;
 
   return <section className="game-board trusted-match">
-    <div className="game-progress"><span>Worry {index + 1} of {rounds.length}</span><span>⭐ {score} matched</span></div>
+    <div className="game-progress"><span>Worry {index + 1} of {rounds.length}</span><span>{score} matched</span></div>
     <div className="game-progress__bar"><i style={{ width: `${(index / rounds.length) * 100}%` }} /></div>
-    <article className="game-scenario"><span className="game-scenario__icon">💭</span><p>{round.worry}</p></article>
+    <article className="game-scenario"><span className="game-scenario__icon"><Icon name="message" size={22} /></span><p>{round.worry}</p></article>
     <p className="game-prompt">Who or what can help?</p>
     <div className="game-choices game-choices--text">
       {round.options.map((option, optionIndex) => <button key={option} className={`game-choice ${picked === optionIndex ? 'is-picked' : ''} ${picked !== null && optionIndex === round.answer ? 'is-answer' : ''}`} disabled={picked !== null} onClick={() => pick(optionIndex)}>
@@ -37,9 +38,9 @@ export default function TrustedHelperMatch({ onFinish }) {
       </button>)}
     </div>
     {picked !== null && <aside className={`game-feedback ${correct ? 'good' : 'review'}`}>
-      <b>{correct ? '✓ Perfect match!' : '↗ The best helper is highlighted'}</b>
+      <b>{correct ? 'Perfect match' : 'The best helper is highlighted'}</b>
       <p>{round.explain}</p>
-      <button className="button" onClick={next}>{index === rounds.length - 1 ? 'See my score' : 'Next worry'} <span>→</span></button>
+      <button className="button" onClick={next}>{index === rounds.length - 1 ? 'See my score' : 'Next worry'} <Icon name="arrowRight" size={16} /></button>
     </aside>}
   </section>;
 }

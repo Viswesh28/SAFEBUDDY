@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from '../components/Icon';
 
 // Original scenarios written for children aged 8 to 14, reflecting common child-safety guidance.
 const scenarios = [
@@ -11,9 +12,9 @@ const scenarios = [
 ];
 
 const choices = [
-  { id: 'safe', label: 'Safe', icon: '🟢' },
-  { id: 'unsafe', label: 'Not safe', icon: '🔴' },
-  { id: 'ask', label: 'Ask a trusted adult', icon: '🟡' }
+  { id: 'safe', label: 'Safe', tone: 'safe' },
+  { id: 'unsafe', label: 'Not safe', tone: 'unsafe' },
+  { id: 'ask', label: 'Ask a trusted adult', tone: 'ask' }
 ];
 
 export default function SafeOrNot({ onFinish }) {
@@ -35,19 +36,19 @@ export default function SafeOrNot({ onFinish }) {
   const correct = picked === scenario.answer;
 
   return <section className="game-board safe-or-not">
-    <div className="game-progress"><span>Situation {index + 1} of {scenarios.length}</span><span>⭐ {score} correct</span></div>
+    <div className="game-progress"><span>Situation {index + 1} of {scenarios.length}</span><span>{score} correct</span></div>
     <div className="game-progress__bar"><i style={{ width: `${(index / scenarios.length) * 100}%` }} /></div>
-    <article className="game-scenario"><span className="game-scenario__icon">🤔</span><p>{scenario.text}</p></article>
+    <article className="game-scenario"><span className="game-scenario__icon"><Icon name="bulb" size={22} /></span><p>{scenario.text}</p></article>
     <p className="game-prompt">What would you do?</p>
     <div className="game-choices">
       {choices.map((choice) => <button key={choice.id} className={`game-choice ${picked === choice.id ? 'is-picked' : ''} ${picked && choice.id === scenario.answer ? 'is-answer' : ''}`} disabled={Boolean(picked)} onClick={() => pick(choice.id)}>
-        <span>{choice.icon}</span>{choice.label}
+        <span className={`tone-dot tone-dot--${choice.tone}`} aria-hidden="true" />{choice.label}
       </button>)}
     </div>
     {picked && <aside className={`game-feedback ${correct ? 'good' : 'review'}`}>
-      <b>{correct ? '✓ Great call!' : '↗ Good to learn this one'}</b>
+      <b>{correct ? 'Great call' : 'Good to learn this one'}</b>
       <p>{scenario.explain}</p>
-      <button className="button" onClick={next}>{index === scenarios.length - 1 ? 'See my score' : 'Next situation'} <span>→</span></button>
+      <button className="button" onClick={next}>{index === scenarios.length - 1 ? 'See my score' : 'Next situation'} <Icon name="arrowRight" size={16} /></button>
     </aside>}
   </section>;
 }

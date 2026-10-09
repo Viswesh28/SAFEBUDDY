@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Icon from '../components/Icon';
 
 // Legend: S start, H home, h trusted helper (collect), R risky spot (costs a heart), # wall, . safe path
 // A route from S to H avoiding every R exists and collects every helper on the way.
@@ -18,7 +19,7 @@ const start = { r: 0, c: 0 };
 const home = { r: rows - 1, c: cols - 1 };
 const cellAt = (r, c) => layout[r][c];
 
-const tileIcon = { H: '🏠', h: '⭐', R: '⚠️', '#': '' };
+const tileIcon = { H: <Icon name="home" size={22} />, h: <Icon name="star" size={20} />, R: <Icon name="alert" size={20} />, '#': '' };
 const moves = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1] };
 const hintFor = { '#': 'A wall. Try another way.', R: 'Risky spot! Find another way, and ask a trusted adult when unsure.' };
 
@@ -26,7 +27,7 @@ export default function SafePathMaze({ onFinish }) {
   const [pos, setPos] = useState(start);
   const [collected, setCollected] = useState(() => new Set());
   const [hearts, setHearts] = useState(3);
-  const [message, setMessage] = useState('Guide your buddy home. Collect ⭐ trusted helpers and avoid ⚠️ risky spots.');
+  const [message, setMessage] = useState('Guide your buddy home. Collect trusted helpers and avoid risky spots.');
   const [status, setStatus] = useState('playing');
 
   const restart = () => { setPos(start); setCollected(new Set()); setHearts(3); setStatus('playing'); setMessage('Let’s try again. Pick your path carefully.'); };
@@ -50,7 +51,7 @@ export default function SafePathMaze({ onFinish }) {
       if (!collected.has(key)) {
         const next = new Set(collected).add(key);
         setCollected(next);
-        setMessage('Trusted helper found! ⭐ Remember: a trusted adult is always a good person to talk to.');
+        setMessage('Trusted helper found. Remember: a trusted adult is always a good person to talk to.');
       }
     }
     if (cell === 'H') {
@@ -74,23 +75,23 @@ export default function SafePathMaze({ onFinish }) {
   const grid = useMemo(() => layout.map((row, r) => row.split('').map((cell, c) => ({ cell, r, c }))), []);
 
   return <section className="game-board safe-path">
-    <div className="game-progress"><span>❤️ {hearts} hearts left</span><span>⭐ {collected.size} of {totalHelpers} helpers</span></div>
+    <div className="game-progress"><span><Icon name="heart" size={15} /> {hearts} hearts left</span><span><Icon name="star" size={15} /> {collected.size} of {totalHelpers} helpers</span></div>
     <div className="maze" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }} role="img" aria-label="Maze board">
       {grid.flat().map(({ cell, r, c }) => {
         const isBuddy = pos.r === r && pos.c === c;
         const isCollected = cell === 'h' && collected.has(`${r},${c}`);
         const className = ['maze__cell', cell === '#' ? 'is-wall' : '', cell === 'R' ? 'is-risk' : '', cell === 'h' ? 'is-helper' : '', cell === 'H' ? 'is-home' : '', isCollected ? 'is-collected' : ''].join(' ');
         return <div key={`${r}-${c}`} className={className}>
-          {isBuddy ? <span className="maze__buddy">🧒</span> : (isCollected ? '✅' : tileIcon[cell] ?? '')}
+          {isBuddy ? <span className="maze__buddy"><Icon name="smile" size={22} /></span> : (isCollected ? <Icon name="check" size={20} /> : tileIcon[cell] ?? '')}
         </div>;
       })}
     </div>
     <p className="game-message" aria-live="polite">{message}</p>
-    {status === 'lost' ? <button className="button" onClick={restart}>Try again <span>↻</span></button> : <div className="dpad" aria-label="Move buddy">
-      <span /><button aria-label="Up" onClick={() => move(-1, 0)}>▲</button><span />
-      <button aria-label="Left" onClick={() => move(0, -1)}>◀</button><span />
-      <button aria-label="Right" onClick={() => move(0, 1)}>▶</button>
-      <span /><button aria-label="Down" onClick={() => move(1, 0)}>▼</button><span />
+    {status === 'lost' ? <button className="button" onClick={restart}>Try again <Icon name="refresh" size={15} /></button> : <div className="dpad" aria-label="Move buddy">
+      <span /><button aria-label="Up" onClick={() => move(-1, 0)}><Icon name="arrowUp" size={18} /></button><span />
+      <button aria-label="Left" onClick={() => move(0, -1)}><Icon name="arrowLeft" size={18} /></button><span />
+      <button aria-label="Right" onClick={() => move(0, 1)}><Icon name="arrowRight" size={18} /></button>
+      <span /><button aria-label="Down" onClick={() => move(1, 0)}><Icon name="arrowDown" size={18} /></button><span />
     </div>}
     <p className="game-hint">Use the arrow keys, WASD, or the buttons to move.</p>
   </section>;
