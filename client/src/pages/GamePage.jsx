@@ -4,6 +4,8 @@ import confetti from 'canvas-confetti';
 import { api } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { gameComponents } from '../games';
+import { SafetyAudio } from '../components/SafetyMedia';
+import { gameMedia } from '../utils/safetyMedia';
 
 export default function GamePage() {
   const { gameId } = useParams();
@@ -73,6 +75,7 @@ export default function GamePage() {
     </header>
     {saving && <p className="form-error">Saving your result…</p>}
     {saveError && <p className="form-error">⚠ {saveError}</p>}
+    <SafetyAudio clips={gameMedia[gameId]?.clips || []} heading="Listen before you play" />
     <Component key={playKey} onFinish={finish} />
   </article>;
 }

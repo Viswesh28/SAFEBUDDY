@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
+import { YouTubeEmbeds } from '../components/SafetyMedia';
+import { playSoundVideos } from '../utils/safetyMedia';
 
 export default function GamesPage() {
   const { token } = useAuth();
@@ -37,6 +39,8 @@ export default function GamesPage() {
         </div>
       </Link>)}
     </section>
+
+    <div className="safety-sound"><YouTubeEmbeds videos={playSoundVideos} heading="Sound and songs from YouTube" note="Songs and stories from YouTube channels, shown in YouTube’s player. Listen with a trusted adult." /></div>
 
     <aside className="learning-tip"><span>💡</span><div><b>Remember</b><p>In a real emergency in India, call <b>112</b>. For someone to talk to at any time, call <b>CHILDLINE 1098</b> (free, 24 hours).</p></div></aside>
     <p className="credits-note">Built with open-source tools (React, Vite, Express, SQLite, canvas-confetti). The games are original SafeBuddy content.</p>
