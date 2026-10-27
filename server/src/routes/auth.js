@@ -6,16 +6,19 @@ import { requireAuth } from '../middleware/auth.js';
 import { JWT_SECRET } from '../config.js';
 
 const router = Router();
+const allowedAvatars = ['🌟', '🦊', '🐼', '🐯', '🦋'];
 const signToken = (user) => jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
 router.post('/register', async (req, res, next) => {
   try {
-    const { name, email, password, avatar } = req.body;
-    if (!name?.trim() || !email?.trim() || !password) return res.status(400).json({ message: 'Name, email, and password are required.' });
+    const { name, email, password, avatar } = req.body ?? {};
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string' || !name.trim() || !email.trim() || !password) return res.status(400).json({ message: 'Name, email, and password are required.' });
+    if (name.trim().length > 60) return res.status(400).json({ message: 'Name must be 60 characters or fewer.' });
+    if (avatar !== undefined && !allowedAvatars.includes(avatar)) return res.status(400).json({ message: 'Choose one of the available avatars.' });
     if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ message: 'Enter a valid email address.' });
     if (password.length < 8) return res.status(400).json({ message: 'Use a password with at least 8 characters.' });
     if (await findUserByEmail(email)) return res.status(409).json({ message: 'An account with that email already exists.' });
-    const user = await createUser({ name: name.trim(), email: email.trim(), passwordHash: await bcrypt.hash(password, 10), avatar: avatar || '🌟' });
+    const user = await createUser({ name: name.trim(), email: email.trim(), passwordHash: await bcrypt.hash(password, 10), avatar: avatar ?? allowedAvatars[0] });
     res.status(201).json({ token: signToken(user), user: withoutPassword(user) });
   } catch (error) { next(error); }
 });
