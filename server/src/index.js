@@ -19,7 +19,7 @@ const configuredOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({ origin(origin, callback) {
-  if (!origin || configuredOrigins.includes(origin) || /^https:\/\/\d+-.*\.e2b\.app$/.test(origin)) return callback(null, true);
+  if (!origin || configuredOrigins.includes(origin)) return callback(null, true);
   callback(new Error('This origin is not permitted.'));
 }, credentials: true }));
 app.use(express.json({ limit: '300kb' }));

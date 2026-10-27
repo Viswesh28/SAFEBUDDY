@@ -3,9 +3,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createUser, findUserByEmail, findUserById, withoutPassword } from '../services/repository.js';
 import { requireAuth } from '../middleware/auth.js';
+import { JWT_SECRET } from '../config.js';
 
 const router = Router();
-const signToken = (user) => jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET || 'safebuddy-development-secret', { expiresIn: '7d' });
+const signToken = (user) => jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -21,7 +22,10 @@ router.post('/register', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
     const user = await findUserByEmail(email || '');
     if (!user || !(await bcrypt.compare(password || '', user.passwordHash))) return res.status(401).json({ message: 'Email or password is not correct.' });
     res.json({ token: signToken(user), user: withoutPassword(user) });

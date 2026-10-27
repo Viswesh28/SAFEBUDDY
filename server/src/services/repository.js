@@ -199,14 +199,16 @@ const lessonColumns = {
 };
 
 async function seedSqliteIfEmpty() {
-  const { count } = await get('SELECT COUNT(*) AS count FROM users');
+  const { count } = await get('SELECT COUNT(*) AS count FROM lessons');
   if (count > 0) return;
 
   const timestamp = nowIso();
   const userRows = [];
-  for (const person of starterUsers) {
-    const password = person.role === 'admin' ? 'Admin@123' : 'Learn@123';
-    userRows.push({ ...person, passwordHash: await bcrypt.hash(password, 10) });
+  if (process.env.NODE_ENV !== 'production') {
+    for (const person of starterUsers) {
+      const password = person.role === 'admin' ? 'Admin@123' : 'Learn@123';
+      userRows.push({ ...person, passwordHash: await bcrypt.hash(password, 10) });
+    }
   }
 
   await run('BEGIN');
@@ -246,7 +248,7 @@ async function seedSqliteIfEmpty() {
     await run('ROLLBACK').catch(() => {});
     throw error;
   }
-  console.log('Seeded SQLite database with SafeBuddy starter content and demo accounts.');
+  console.log(`Seeded SQLite database with SafeBuddy starter content${userRows.length ? ' and demo accounts' : ''}.`);
 }
 
 // Adds columns introduced after a database was first created.
@@ -274,16 +276,16 @@ async function openSqlite() {
 async function seedMongoIfEmpty() {
   if (await Lesson.countDocuments()) return;
   const seededUsers = [];
-  for (const person of starterUsers) {
-    const password = person.role === 'admin' ? 'Admin@123' : 'Learn@123';
-    seededUsers.push(toMongo({ ...person, passwordHash: await bcrypt.hash(password, 10) }));
+  if (process.env.NODE_ENV !== 'production') {
+    for (const person of starterUsers) {
+      const password = person.role === 'admin' ? 'Admin@123' : 'Learn@123';
+      seededUsers.push(toMongo({ ...person, passwordHash: await bcrypt.hash(password, 10) }));
+    }
   }
-  await Promise.all([
-    User.insertMany(seededUsers),
-    Lesson.insertMany(lessons.map(toMongo)),
-    Quiz.insertMany(quizzes.map(toMongo))
-  ]);
-  console.log('Seeded MongoDB with SafeBuddy demo content.');
+  const seedOperations = [Lesson.insertMany(lessons.map(toMongo)), Quiz.insertMany(quizzes.map(toMongo))];
+  if (seededUsers.length) seedOperations.push(User.insertMany(seededUsers));
+  await Promise.all(seedOperations);
+  console.log(`Seeded MongoDB with SafeBuddy ${seededUsers.length ? 'demo ' : ''}content.`);
 }
 
 /* ------------------------------------------------------------------ */
