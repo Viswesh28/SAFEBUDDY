@@ -11,10 +11,11 @@ import lessonsRouter from './routes/lessons.js';
 import quizzesRouter from './routes/quizzes.js';
 import progressRouter from './routes/progress.js';
 import gamesRouter from './routes/games.js';
+import collectionRouter from './routes/collection.js';
 import { initialiseRepository, repositoryMode } from './services/repository.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const app = express();
+export const app = express();
 const port = Number(process.env.PORT || 5000);
 const configuredOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(',').map((origin) => origin.trim());
 const fifteenMinutes = 15 * 60 * 1000;
@@ -50,6 +51,7 @@ app.use('/api/lessons', lessonsRouter);
 app.use('/api/quizzes', quizzesRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/games', gamesRouter);
+app.use('/api/collection', collectionRouter);
 
 app.use('/api', (req, res) => res.status(404).json({ message: 'This API route does not exist.' }));
 
@@ -69,9 +71,19 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: error.message || 'Something went wrong. Please try again.' });
 });
 
-initialiseRepository().then(() => {
-  app.listen(port, '0.0.0.0', () => console.log(`SafeBuddy API running on port ${port}`));
-}).catch((error) => {
-  console.error('Could not start SafeBuddy:', error);
-  process.exit(1);
-});
+export async function initialiseApp() {
+  await initialiseRepository();
+  return app;
+}
+
+export async function startServer() {
+  await initialiseApp();
+  return app.listen(port, '0.0.0.0', () => console.log(`SafeBuddy API running on port ${port}`));
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  startServer().catch((error) => {
+    console.error('Could not start SafeBuddy:', error);
+    process.exit(1);
+  });
+}

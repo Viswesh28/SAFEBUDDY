@@ -10,6 +10,7 @@ import Lesson from '../models/Lesson.js';
 import Quiz from '../models/Quiz.js';
 import Attempt from '../models/Attempt.js';
 import { lessons, quizzes, starterUsers } from './seedData.js';
+import { quizReward, PARTICIPATION_XP } from './rewards.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverRoot = path.resolve(__dirname, '../..');
@@ -51,6 +52,8 @@ const SCHEMA = `
     streak             INTEGER NOT NULL DEFAULT 0,
     completedLessonIds TEXT NOT NULL DEFAULT '[]',
     completedGameIds   TEXT NOT NULL DEFAULT '[]',
+    attemptedQuizIds   TEXT NOT NULL DEFAULT '[]',
+    unlockedCardIds    TEXT NOT NULL DEFAULT '[]',
     badges             TEXT NOT NULL DEFAULT '[]',
     lastActiveAt       TEXT,
     createdAt          TEXT NOT NULL,
@@ -119,6 +122,8 @@ const userFromRow = (row) => row && ({
   streak: row.streak,
   completedLessonIds: parseJson(row.completedLessonIds, []),
   completedGameIds: parseJson(row.completedGameIds, []),
+  attemptedQuizIds: parseJson(row.attemptedQuizIds, []),
+  unlockedCardIds: parseJson(row.unlockedCardIds, []),
   badges: parseJson(row.badges, []),
   lastActiveAt: row.lastActiveAt || null,
   createdAt: row.createdAt,
@@ -181,6 +186,8 @@ const userColumns = {
   streak: { column: 'streak', encode: Number },
   completedLessonIds: { column: 'completedLessonIds', encode: JSON.stringify },
   completedGameIds: { column: 'completedGameIds', encode: JSON.stringify },
+  attemptedQuizIds: { column: 'attemptedQuizIds', encode: JSON.stringify },
+  unlockedCardIds: { column: 'unlockedCardIds', encode: JSON.stringify },
   badges: { column: 'badges', encode: JSON.stringify },
   lastActiveAt: { column: 'lastActiveAt' }
 };
@@ -200,11 +207,10 @@ const lessonColumns = {
 
 async function seedSqliteIfEmpty() {
   const { count } = await get('SELECT COUNT(*) AS count FROM lessons');
-  if (count > 0) return;
 
   const timestamp = nowIso();
   const userRows = [];
-  if (process.env.NODE_ENV !== 'production') {
+  if (count === 0 && process.env.NODE_ENV !== 'production') {
     for (const person of starterUsers) {
       const password = person.role === 'admin' ? 'Admin@123' : 'Learn@123';
       userRows.push({ ...person, passwordHash: await bcrypt.hash(password, 10) });
@@ -215,7 +221,7 @@ async function seedSqliteIfEmpty() {
   try {
     for (const person of userRows) {
       await run(
-        `INSERT INTO users (id, name, email, passwordHash, role, avatar, xp, streak,
+        `INSERT OR IGNORE INTO users (id, name, email, passwordHash, role, avatar, xp, streak,
            completedLessonIds, completedGameIds, badges, lastActiveAt, createdAt, updatedAt)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -228,7 +234,7 @@ async function seedSqliteIfEmpty() {
     }
     for (const [index, lesson] of lessons.entries()) {
       await run(
-        `INSERT INTO lessons (id, title, summary, category, icon, color, minutes, level,
+        `INSERT OR IGNORE INTO lessons (id, title, summary, category, icon, color, minutes, level,
            sections, published, sortOrder, createdAt, updatedAt)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
         [
@@ -239,7 +245,7 @@ async function seedSqliteIfEmpty() {
     }
     for (const quiz of quizzes) {
       await run(
-        `INSERT INTO quizzes (id, lessonId, title, xpReward, questions) VALUES (?, ?, ?, ?, ?)`,
+        `INSERT OR IGNORE INTO quizzes (id, lessonId, title, xpReward, questions) VALUES (?, ?, ?, ?, ?)`,
         [quiz.id, quiz.lessonId, quiz.title, quiz.xpReward || 30, JSON.stringify(quiz.questions)]
       );
     }
@@ -248,7 +254,7 @@ async function seedSqliteIfEmpty() {
     await run('ROLLBACK').catch(() => {});
     throw error;
   }
-  console.log(`Seeded SQLite database with SafeBuddy starter content${userRows.length ? ' and demo accounts' : ''}.`);
+  console.log(`Seeded missing SQLite SafeBuddy content${userRows.length ? ' and demo accounts' : ''}.`);
 }
 
 // Adds columns introduced after a database was first created.
@@ -256,6 +262,12 @@ async function migrateSqlite() {
   const columns = await all('PRAGMA table_info(users)');
   if (!columns.some((column) => column.name === 'completedGameIds')) {
     await run("ALTER TABLE users ADD COLUMN completedGameIds TEXT NOT NULL DEFAULT '[]'");
+  }
+  if (!columns.some((column) => column.name === 'attemptedQuizIds')) {
+    await run("ALTER TABLE users ADD COLUMN attemptedQuizIds TEXT NOT NULL DEFAULT '[]'");
+  }
+  if (!columns.some((column) => column.name === 'unlockedCardIds')) {
+    await run("ALTER TABLE users ADD COLUMN unlockedCardIds TEXT NOT NULL DEFAULT '[]'");
   }
 }
 
@@ -312,6 +324,11 @@ export async function initialiseRepository() {
 
 export const repositoryMode = () => mode;
 
+export function closeRepository() {
+  if (sqliteDb) sqliteDb.close();
+  sqliteDb = null;
+}
+
 export async function findUserByEmail(email) {
   if (mode === 'mongo') return mongoPlain(await User.findOne({ email: email.toLowerCase() }));
   return userFromRow(await get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()]));
@@ -325,7 +342,7 @@ export async function findUserById(id) {
 export async function createUser({ name, email, passwordHash, avatar = '🌟', role = 'learner' }) {
   const user = {
     id: makeId(), name, email: email.toLowerCase(), passwordHash, avatar, role,
-    xp: 0, streak: 0, completedLessonIds: [], completedGameIds: [], badges: [], lastActiveAt: null,
+    xp: 0, streak: 0, completedLessonIds: [], completedGameIds: [], attemptedQuizIds: [], unlockedCardIds: [], badges: [], lastActiveAt: null,
     createdAt: nowIso(), updatedAt: nowIso()
   };
   if (mode === 'mongo') return mongoPlain(await User.create(toMongo(user)));
@@ -348,6 +365,89 @@ export async function updateUser(id, updates) {
     );
   }
   return findUserById(id);
+}
+
+let sqliteTransactionQueue = Promise.resolve();
+
+async function withSqliteWriteTransaction(work) {
+  let release;
+  const previous = sqliteTransactionQueue;
+  sqliteTransactionQueue = new Promise((resolve) => { release = resolve; });
+  await previous;
+  await run('BEGIN IMMEDIATE');
+  try {
+    const result = await work();
+    await run('COMMIT');
+    return result;
+  } catch (error) {
+    await run('ROLLBACK').catch(() => {});
+    throw error;
+  } finally {
+    release();
+  }
+}
+
+// Claims a game's one-time XP and related cards. The conditional Mongo update and
+// SQLite write transaction ensure concurrent completions cannot both earn XP.
+export async function claimGameCompletion({ userId, gameId, xpReward }) {
+  if (mode === 'mongo') {
+    const claimed = await User.findOneAndUpdate(
+      { externalId: userId, completedGameIds: { $ne: gameId } },
+      {
+        $addToSet: { completedGameIds: gameId },
+        $inc: { xp: xpReward }
+      },
+      { new: true }
+    );
+    if (claimed) return { firstCompletion: true, user: mongoPlain(claimed) };
+    return { firstCompletion: false, user: await findUserById(userId) };
+  }
+
+  return withSqliteWriteTransaction(async () => {
+    const user = await findUserById(userId);
+    if (user.completedGameIds.includes(gameId)) return { firstCompletion: false, user };
+    const updatedUser = await updateUser(userId, {
+      completedGameIds: [...user.completedGameIds, gameId],
+      xp: (user.xp || 0) + xpReward
+    });
+    return { firstCompletion: true, user: updatedUser };
+  });
+}
+
+// Claims first-attempt and first-pass quiz rewards atomically. Attempts are still
+// saved separately so the learner keeps a full history of quiz submissions.
+export async function claimQuizRewards({ userId, quizId, lessonId, quizXp, passed }) {
+  if (mode === 'mongo') {
+    const firstAttempt = await User.updateOne(
+      { externalId: userId, attemptedQuizIds: { $ne: quizId } },
+      { $addToSet: { attemptedQuizIds: quizId }, $inc: { xp: PARTICIPATION_XP } }
+    );
+    const firstPass = passed ? await User.updateOne(
+      { externalId: userId, completedLessonIds: { $ne: lessonId } },
+      { $addToSet: { completedLessonIds: lessonId }, $inc: { xp: quizXp } }
+    ) : { modifiedCount: 0 };
+    const isFirstAttemptAtQuiz = firstAttempt.modifiedCount === 1;
+    const isFirstPassForLesson = firstPass.modifiedCount === 1;
+    return {
+      isFirstAttemptAtQuiz,
+      isFirstPassForLesson,
+      reward: quizReward({ quizXp, passed, isFirstAttemptAtQuiz, isFirstPassForLesson }),
+      user: await findUserById(userId)
+    };
+  }
+
+  return withSqliteWriteTransaction(async () => {
+    const user = await findUserById(userId);
+    const isFirstAttemptAtQuiz = !user.attemptedQuizIds.includes(quizId);
+    const isFirstPassForLesson = passed && !user.completedLessonIds.includes(lessonId);
+    const reward = quizReward({ quizXp, passed, isFirstAttemptAtQuiz, isFirstPassForLesson });
+    const updatedUser = await updateUser(userId, {
+      attemptedQuizIds: isFirstAttemptAtQuiz ? [...user.attemptedQuizIds, quizId] : user.attemptedQuizIds,
+      completedLessonIds: isFirstPassForLesson ? [...user.completedLessonIds, lessonId] : user.completedLessonIds,
+      xp: (user.xp || 0) + reward.total
+    });
+    return { isFirstAttemptAtQuiz, isFirstPassForLesson, reward, user: updatedUser };
+  });
 }
 
 export async function allLessons({ includeUnpublished = false } = {}) {
