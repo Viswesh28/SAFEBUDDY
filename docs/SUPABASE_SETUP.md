@@ -112,6 +112,36 @@ The same build works on Railway, Fly.io or a VPS: `npm run install:all && npm ru
 then `npm start` with the environment variables above. A single process means one origin, so
 CORS, cookies and `localStorage` tokens all behave exactly as they do locally.
 
+## 5b. Deploying to Vercel
+
+The repository is ready for Vercel: `vercel.json` builds the client, `api/index.mjs` exposes the
+Express app as a serverless function, and `server/src/index.js` skips binding a port when
+`VERCEL=1`.
+
+1. In Vercel, **Add New → Project → Import Git Repository** and pick the SafeBuddy repo
+   (choose the branch you want to ship).
+2. Vercel reads `vercel.json`; no build settings need changing.
+3. Add these environment variables (Production and Preview):
+
+   | Variable | Value |
+   | --- | --- |
+   | `SUPABASE_DB_URL` | the transaction-pooler string from step 2 |
+   | `JWT_SECRET` | a long random value |
+   | `CLIENT_ORIGIN` | your deployment origin, e.g. `https://safebuddy.vercel.app` |
+   | `PG_POOL_MAX` | `2` — keeps each serverless instance inside the pooler budget |
+   | `NODE_ENV` | `production` |
+
+4. Deploy, then confirm `https://<your-app>/api/health` returns `"storage":"supabase"`.
+
+Serverless notes:
+
+- Every cold start re-applies `server/db/schema.sql` (it is idempotent) and skips seeding once
+  lessons exist, so the first request is a little slower than later ones.
+- `CLIENT_ORIGIN` must match the deployed origin exactly. Preview deployments get their own
+  origins, so either add them to the comma-separated list or use one stable production domain.
+- The in-memory rate limiter is per instance on serverless. That is acceptable for a demo; use a
+  shared store (for example Upstash Redis) if the limits need to hold across instances.
+
 ## 6. Verify a deployment
 
 - `GET /api/health` → `"storage":"supabase"`
