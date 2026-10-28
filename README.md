@@ -56,28 +56,37 @@ The starter curriculum covers:
 - Node.js 22.13+ (or 24 LTS) and npm — the server uses Node's built-in SQLite, so no native build step is needed
 - Optional: MongoDB 7+ (or a MongoDB Atlas connection string) for database-backed persistence
 
-### Installation
+### Installation and start
 
-```bash
-git clone https://github.com/YOUR-USERNAME/safebuddy.git
-cd safebuddy
-npm run install:all
-```
+**Requirements:** Node.js 22.13 or newer (Node 24 LTS is also supported) and npm. The default demo uses Node's built-in SQLite, so MongoDB is not required.
 
-Create `server/.env` from the example:
+1. Clone the repository and enter its directory:
 
-```bash
-cp server/.env.example server/.env
-```
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/safebuddy.git
+   cd safebuddy
+   ```
 
-Start the client and API together:
+2. Install all dependencies from the repository root. This installs the root development tools plus the server and client packages:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run install:all
+   ```
 
-- Client: `http://localhost:5173`
-- API health check: `http://localhost:5000/api/health`
+3. Start the frontend and API together:
+
+   ```bash
+   npm run dev
+   ```
+
+   The first run seeds the local SQLite database and demo accounts automatically. No `.env` file or database setup is needed for the default demo.
+
+4. Open the app and check the API:
+
+   - Client: `http://localhost:5173`
+   - API health check: `http://localhost:5000/api/health`
+
+To use MongoDB instead of the default SQLite database, copy `server/.env.example` to `server/.env`, set `MONGO_URI` to your MongoDB connection string, and provide a unique `JWT_SECRET`. Ensure MongoDB is available before starting the app. Leave `MONGO_URI` unset to use SQLite.
 
 ### Demo accounts
 
