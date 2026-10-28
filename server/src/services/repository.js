@@ -9,6 +9,7 @@ import User from '../models/User.js';
 import Lesson from '../models/Lesson.js';
 import Quiz from '../models/Quiz.js';
 import Attempt from '../models/Attempt.js';
+import * as supabase from './supabaseRepository.js';
 import { lessons, quizzes, starterUsers } from './seedData.js';
 import { quizReward, PARTICIPATION_XP } from './rewards.js';
 
@@ -304,6 +305,9 @@ async function seedMongoIfEmpty() {
 /* Public repository API                                               */
 /* ------------------------------------------------------------------ */
 
+// Backend order: MongoDB (MONGO_URI) > Supabase Postgres (SUPABASE_DB_URL) > local SQLite.
+// A Supabase failure fails the boot in production instead of silently landing on a
+// throwaway SQLite file; in development it falls back so demos keep working offline.
 export async function initialiseRepository() {
   if (process.env.MONGO_URI) {
     try {
@@ -316,30 +320,43 @@ export async function initialiseRepository() {
       console.warn(`MongoDB unavailable (${error.message}). Using SQLite instead.`);
     }
   }
+  if (process.env.SUPABASE_DB_URL) {
+    try {
+      mode = await supabase.initialiseSupabase();
+      return mode;
+    } catch (error) {
+      if (process.env.NODE_ENV === 'production') throw error;
+      console.warn(`Supabase unavailable (${error.message}). Using SQLite instead.`);
+    }
+  }
   mode = 'sqlite';
   await openSqlite();
-  console.log(`Using SQLite database at ${path.relative(serverRoot, sqlitePath)}. Set MONGO_URI to use MongoDB.`);
+  console.log(`Using SQLite database at ${path.relative(serverRoot, sqlitePath)}. Set MONGO_URI or SUPABASE_DB_URL to use a hosted database.`);
   return mode;
 }
 
 export const repositoryMode = () => mode;
 
-export function closeRepository() {
+export async function closeRepository() {
   if (sqliteDb) sqliteDb.close();
   sqliteDb = null;
+  await supabase.closeSupabase();
 }
 
 export async function findUserByEmail(email) {
+  if (mode === 'supabase') return supabase.findUserByEmail(email);
   if (mode === 'mongo') return mongoPlain(await User.findOne({ email: email.toLowerCase() }));
   return userFromRow(await get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()]));
 }
 
 export async function findUserById(id) {
+  if (mode === 'supabase') return supabase.findUserById(id);
   if (mode === 'mongo') return mongoPlain(await User.findOne({ externalId: id }));
   return userFromRow(await get('SELECT * FROM users WHERE id = ?', [id]));
 }
 
 export async function createUser({ name, email, passwordHash, avatar = '🌟', role = 'learner' }) {
+  if (mode === 'supabase') return supabase.createUser({ name, email, passwordHash, avatar, role });
   const user = {
     id: makeId(), name, email: email.toLowerCase(), passwordHash, avatar, role,
     xp: 0, streak: 0, completedLessonIds: [], completedGameIds: [], attemptedQuizIds: [], unlockedCardIds: [], badges: [], lastActiveAt: null,
@@ -356,6 +373,7 @@ export async function createUser({ name, email, passwordHash, avatar = '🌟', r
 }
 
 export async function updateUser(id, updates) {
+  if (mode === 'supabase') return supabase.updateUser(id, updates);
   if (mode === 'mongo') return mongoPlain(await User.findOneAndUpdate({ externalId: id }, { $set: updates }, { new: true }));
   const { sets, params } = buildUpdate(updates, userColumns);
   if (sets.length) {
@@ -390,6 +408,7 @@ async function withSqliteWriteTransaction(work) {
 // Claims a game's one-time XP and related cards. The conditional Mongo update and
 // SQLite write transaction ensure concurrent completions cannot both earn XP.
 export async function claimGameCompletion({ userId, gameId, xpReward }) {
+  if (mode === 'supabase') return supabase.claimGameCompletion({ userId, gameId, xpReward });
   if (mode === 'mongo') {
     const claimed = await User.findOneAndUpdate(
       { externalId: userId, completedGameIds: { $ne: gameId } },
@@ -417,6 +436,7 @@ export async function claimGameCompletion({ userId, gameId, xpReward }) {
 // Claims first-attempt and first-pass quiz rewards atomically. Attempts are still
 // saved separately so the learner keeps a full history of quiz submissions.
 export async function claimQuizRewards({ userId, quizId, lessonId, quizXp, passed }) {
+  if (mode === 'supabase') return supabase.claimQuizRewards({ userId, quizId, lessonId, quizXp, passed });
   if (mode === 'mongo') {
     const firstAttempt = await User.updateOne(
       { externalId: userId, attemptedQuizIds: { $ne: quizId } },
@@ -451,6 +471,7 @@ export async function claimQuizRewards({ userId, quizId, lessonId, quizXp, passe
 }
 
 export async function allLessons({ includeUnpublished = false } = {}) {
+  if (mode === 'supabase') return supabase.allLessons({ includeUnpublished });
   if (mode === 'mongo') {
     const query = includeUnpublished ? {} : { published: true };
     return (await Lesson.find(query).sort({ order: 1 })).map(mongoPlain);
@@ -462,11 +483,13 @@ export async function allLessons({ includeUnpublished = false } = {}) {
 }
 
 export async function lessonById(id) {
+  if (mode === 'supabase') return supabase.lessonById(id);
   if (mode === 'mongo') return mongoPlain(await Lesson.findOne({ externalId: id }));
   return lessonFromRow(await get('SELECT * FROM lessons WHERE id = ?', [id]));
 }
 
 export async function createLesson(payload) {
+  if (mode === 'supabase') return supabase.createLesson(payload);
   const { count } = await get('SELECT COUNT(*) AS count FROM lessons');
   const lesson = { id: makeId(), published: true, order: count + 1, ...payload };
   if (mode === 'mongo') return mongoPlain(await Lesson.create(toMongo(lesson)));
@@ -485,6 +508,7 @@ export async function createLesson(payload) {
 }
 
 export async function updateLesson(id, updates) {
+  if (mode === 'supabase') return supabase.updateLesson(id, updates);
   if (mode === 'mongo') return mongoPlain(await Lesson.findOneAndUpdate({ externalId: id }, { $set: updates }, { new: true }));
   const { sets, params } = buildUpdate(updates, lessonColumns);
   if (sets.length) {
@@ -497,16 +521,19 @@ export async function updateLesson(id, updates) {
 }
 
 export async function quizByLessonId(lessonId) {
+  if (mode === 'supabase') return supabase.quizByLessonId(lessonId);
   if (mode === 'mongo') return mongoPlain(await Quiz.findOne({ lessonId }));
   return quizFromRow(await get('SELECT * FROM quizzes WHERE lessonId = ? LIMIT 1', [lessonId]));
 }
 
 export async function quizById(id) {
+  if (mode === 'supabase') return supabase.quizById(id);
   if (mode === 'mongo') return mongoPlain(await Quiz.findOne({ externalId: id }));
   return quizFromRow(await get('SELECT * FROM quizzes WHERE id = ?', [id]));
 }
 
 export async function createQuiz(payload) {
+  if (mode === 'supabase') return supabase.createQuiz(payload);
   const quiz = { id: makeId(), xpReward: 30, ...payload };
   if (mode === 'mongo') return mongoPlain(await Quiz.create(toMongo(quiz)));
   if (!(await lessonById(quiz.lessonId))) {
@@ -523,6 +550,7 @@ export async function createQuiz(payload) {
 
 // Appends questions to an existing lesson quiz. Returns the updated quiz.
 export async function addQuestionsToQuiz(quizId, questions) {
+  if (mode === 'supabase') return supabase.addQuestionsToQuiz(quizId, questions);
   if (mode === 'mongo') return mongoPlain(await Quiz.findOneAndUpdate({ externalId: quizId }, { $push: { questions: { $each: questions } } }, { new: true }));
   const quiz = await quizById(quizId);
   if (!quiz) return null;
@@ -531,18 +559,21 @@ export async function addQuestionsToQuiz(quizId, questions) {
 }
 
 export async function totalCounts() {
+  if (mode === 'supabase') return supabase.totalCounts();
   if (mode === 'mongo') return { lessons: await Lesson.countDocuments({ published: true }) };
   const row = await get('SELECT COUNT(*) AS count FROM lessons WHERE published = 1');
   return { lessons: row.count };
 }
 
 export async function attemptsForUser(userId) {
+  if (mode === 'supabase') return supabase.attemptsForUser(userId);
   if (mode === 'mongo') return (await Attempt.find({ userId }).sort({ createdAt: -1 })).map((doc) => ({ id: doc._id.toString(), ...doc.toObject(), _id: undefined, __v: undefined }));
   const rows = await all('SELECT * FROM attempts WHERE userId = ? ORDER BY createdAt DESC, rowid DESC', [userId]);
   return rows.map(attemptFromRow);
 }
 
 export async function saveAttempt(attempt) {
+  if (mode === 'supabase') return supabase.saveAttempt(attempt);
   const record = { id: makeId(), ...attempt, createdAt: nowIso() };
   if (mode === 'mongo') {
     const created = await Attempt.create(record);

@@ -6,7 +6,11 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "seed": "node src/scripts/seedMongo.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "db:migrate": "node src/scripts/migrateSupabase.js",
+    "db:seed": "node src/scripts/seedSupabase.js",
+    "db:admin": "node src/scripts/createAdmin.js",
+    "test:db": "node --test test/supabaseRepository.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,7 +21,8 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "supertest": "^7.3.1"

@@ -1,0 +1,22 @@
+# Deploy SafeBuddy as one web service: Express serves the built React app and the /api routes.
+# The database lives in Supabase; see docs/SUPABASE_SETUP.md.
+services:
+  - type: web
+    name: safebuddy
+    runtime: node
+    plan: free
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      # Transaction-mode pooler string from Supabase (port 6543, ?sslmode=require).
+      - key: SUPABASE_DB_URL
+        sync: false
+      # The deployed site origin, e.g. https://safebuddy.onrender.com
+      - key: CLIENT_ORIGIN
+        sync: false

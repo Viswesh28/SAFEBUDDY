@@ -34,6 +34,10 @@ const authLimiter = rateLimit({
   handler: (req, res) => res.status(429).json({ message: 'Too many sign-in attempts. Please wait 15 minutes and try again.' })
 });
 
+// Hosts such as Render, Railway and Vercel terminate TLS and forward the real client IP in
+// X-Forwarded-For. Without this, express-rate-limit counts the proxy and throttles everyone.
+app.set('trust proxy', 1);
+
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({ origin(origin, callback) {
   if (!origin || configuredOrigins.includes(origin)) return callback(null, true);
