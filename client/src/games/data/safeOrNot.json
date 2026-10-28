@@ -1,0 +1,32 @@
+[
+  {
+    "text": "A stranger you met online asks for your school name and where you live.",
+    "answer": "unsafe",
+    "explain": "Never share your school or home address with someone you only know online. Tell a trusted adult."
+  },
+  {
+    "text": "A grown-up you know well will pick you up from school today, and your parent has already said yes.",
+    "answer": "safe",
+    "explain": "A known adult, with a parent’s permission, is a planned and safe arrangement."
+  },
+  {
+    "text": "Someone you do not know offers you sweets and asks you to come and see their puppy.",
+    "answer": "unsafe",
+    "explain": "Never go anywhere with a stranger or leave your place without telling a trusted adult."
+  },
+  {
+    "text": "A friend asks you to keep a secret that makes you feel scared or uncomfortable.",
+    "answer": "ask",
+    "explain": "Secrets that make you feel unsafe should always be shared with a trusted adult, even if you promised."
+  },
+  {
+    "text": "A message says you won a free prize and asks for your password to claim it.",
+    "answer": "unsafe",
+    "explain": "Real companies and games never need your password. Do not share it, and show the message to a parent."
+  },
+  {
+    "text": "You feel unwell at school and are not sure whom to tell.",
+    "answer": "ask",
+    "explain": "Tell your class teacher or the school nurse straight away. Asking for help is a strong step."
+  }
+]

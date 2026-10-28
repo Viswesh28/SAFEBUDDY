@@ -1,0 +1,10 @@
+[
+  { "situation": "Someone needs urgent police, fire, or medical help.", "answer": "112" },
+  { "situation": "A child needs care or protection support.", "answer": "1098" },
+  { "situation": "Money was taken in an online fraud.", "answer": "1930" },
+  { "situation": "Big feelings need mental-health support.", "answer": "14416" },
+  { "situation": "A classmate is being bullied at school.", "answer": "A trusted adult" },
+  { "situation": "You are lost in a public place and feel unsafe.", "answer": "112" },
+  { "situation": "An online stranger asks for private details.", "answer": "A trusted adult" },
+  { "situation": "You need someone to talk to about a child-safety worry.", "answer": "1098" }
+]

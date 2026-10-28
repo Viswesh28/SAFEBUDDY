@@ -5,6 +5,7 @@ import Icon from './Icon';
 const nav = [
   { to: '/dashboard', icon: 'home', label: 'Home' },
   { to: '/learn', icon: 'book', label: 'Learn' },
+  { to: '/cards', icon: 'award', label: 'Collection' },
   { to: '/games', icon: 'game', label: 'Play' },
   { to: '/profile', icon: 'compass', label: 'My journey' }
 ];

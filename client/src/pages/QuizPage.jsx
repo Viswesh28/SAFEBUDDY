@@ -8,7 +8,7 @@ export default function QuizPage() {
   const { lessonId } = useParams(); const navigate = useNavigate(); const { token, setUser } = useAuth(); const [quiz, setQuiz] = useState(null); const [answers, setAnswers] = useState([]); const [step, setStep] = useState(0); const [result, setResult] = useState(null); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   useEffect(() => { api(`/quizzes/lesson/${lessonId}`, { token }).then(({ quiz: loadedQuiz }) => { setQuiz(loadedQuiz); setAnswers(Array(loadedQuiz.questions.length).fill(null)); }).catch((err) => setError(err.message)); }, [lessonId, token]);
   const choose = (choice) => setAnswers((current) => current.map((answer, index) => index === step ? choice : answer));
-  const submit = async () => { setBusy(true); setError(''); try { const data = await api(`/quizzes/${quiz.id}/submit`, { method: 'POST', body: { answers }, token }); setResult(data); setUser(data.user); } catch (err) { setError(err.message); } finally { setBusy(false); } };
+  const submit = async () => { setBusy(true); setError(''); try { const data = await api(`/quizzes/${quiz.id}/submit`, { method: 'POST', body: { answers }, token }); setResult(data); setUser(data.user); if ((data.levelUp || data.newBadges?.length) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) import('canvas-confetti').then(({ default: confetti }) => confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } })); } catch (err) { setError(err.message); } finally { setBusy(false); } };
   if (error && !quiz) return <section className="error-card"><h2>Quiz unavailable</h2><p>{error}</p><Link to={`/learn/${lessonId}`} className="button">Back to lesson</Link></section>;
   if (!quiz) return <main className="loading-page"><span className="spinner" /> Loading your quiz…</main>;
 
@@ -25,8 +25,17 @@ export default function QuizPage() {
       <span>Total XP: {result.user.xp}</span>
       {result.passed && <span><Icon name="check" size={14} /> Lesson progress saved</span>}
     </div>
-    {result.newBadges?.length > 0 && <div className="badge-unlocked">{result.newBadges.map((badge) => <span key={badge.key}><Icon name="award" size={16} /> New badge: <b>{badge.title}</b></span>)}</div>}
-    <div className="feedback-list">
+    {(result.newBadges?.length > 0 || result.levelUp) && <section className="result-achievements" aria-label="New achievements">
+      {result.newBadges?.map((badge) => <article className="result-achievement" key={badge.key}>
+        <span className="result-achievement__icon" aria-hidden="true">{badge.icon || <Icon name="award" size={20} />}</span>
+        <div><b>New badge!</b><p>{badge.title}</p></div>
+      </article>)}
+      {result.levelUp && <article className="result-achievement result-achievement--level">
+        <span className="result-achievement__icon" aria-hidden="true">{result.levelUp.card.icon}</span>
+        <div><b>Level up!</b><p>{result.levelUp.card.title}</p><Link to="/cards">See your collection <Icon name="arrowRight" size={14} /></Link></div>
+      </article>}
+    </section>}
+    <div className="feedback-list" role="status" aria-live="polite" aria-label="Answer feedback">
       {result.feedback.map((feedback, index) => <article key={index} className={feedback.correct ? 'correct' : 'review'}>
         <span className="feedback-mark"><Icon name={feedback.correct ? 'check' : 'refresh'} size={15} /></span>
         <div><b>Question {index + 1}: {feedback.correct ? 'Correct' : 'Review this one'}</b><p>{feedback.explanation}</p></div>
@@ -51,13 +60,14 @@ export default function QuizPage() {
       <span className="question-number">Question {String(step + 1).padStart(2, '0')}</span>
       <h2>{question.prompt}</h2>
       <div className="answer-list">
-        {question.options.map((option, index) => <button key={index} className={answers[step] === index ? 'selected' : ''} onClick={() => choose(index)}>
+        {question.options.map((option, index) => <button key={index} type="button" aria-pressed={answers[step] === index} className={answers[step] === index ? 'selected' : ''} onClick={() => choose(index)}>
           <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
           <span className="answer-text">{option}</span>
           {answers[step] === index && <Icon name="check" size={18} className="answer-check" />}
         </button>)}
       </div>
     </section>
+    <p className="sr-only" aria-live="polite">{canContinue ? `Option ${String.fromCharCode(65 + answers[step])} selected.` : ''}</p>
     {error && <p className="form-error"><Icon name="alert" size={15} /> {error}</p>}
     <footer className="quiz-controls">
       <button className="secondary-button" onClick={() => setStep((current) => current - 1)} disabled={step === 0}><Icon name="arrowLeft" size={15} /> Back</button>

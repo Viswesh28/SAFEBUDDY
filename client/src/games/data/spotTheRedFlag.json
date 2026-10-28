@@ -1,0 +1,6 @@
+[
+  { "messages": ["Hi, I saw your game profile.", "Which school do you go to?", "My school has a big playground."], "answer": 1, "explain": "Your school name is personal information. Do not share it with an unknown person." },
+  { "messages": ["You can tell a trusted adult if a chat worries you.", "Let’s keep our chats secret from your family.", "A safe friend does not ask for secrets that feel worrying."], "answer": 1, "explain": "A request for a worrying secret is a red flag. Stop replying and tell a trusted adult." },
+  { "messages": ["You do not need to send pictures to prove friendship.", "Send me a photo, and do not tell anyone.", "You can block or report an account that makes you uncomfortable."], "answer": 1, "explain": "Never send photos to an unknown person. Save the message if safe and tell a trusted adult." },
+  { "messages": ["Meeting an online stranger is not safe.", "Let’s meet near your bus stop after school.", "A trusted adult can help you report this chat."], "answer": 1, "explain": "Do not meet an unknown online person. Tell a trusted adult right away." }
+]

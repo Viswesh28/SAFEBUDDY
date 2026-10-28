@@ -1,0 +1,17 @@
+{
+  "columns": ["Rights I have", "Things that should not happen to me", "Who can help me"],
+  "cards": [
+    { "text": "Go to school and learn", "column": 0 },
+    { "text": "Rest and play", "column": 0 },
+    { "text": "Be treated with respect", "column": 0 },
+    { "text": "Share my views safely", "column": 0 },
+    { "text": "Being hit or humiliated", "column": 1 },
+    { "text": "Being bullied again and again", "column": 1 },
+    { "text": "Pressure to share private photos", "column": 1 },
+    { "text": "Work that stops school", "column": 1 },
+    { "text": "A parent or caregiver", "column": 2 },
+    { "text": "A teacher or school counsellor", "column": 2 },
+    { "text": "CHILDLINE 1098", "column": 2 },
+    { "text": "A trusted adult nearby", "column": 2 }
+  ]
+}

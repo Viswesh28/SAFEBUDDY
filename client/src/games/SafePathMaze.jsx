@@ -20,7 +20,7 @@ const home = { r: rows - 1, c: cols - 1 };
 const cellAt = (r, c) => layout[r][c];
 
 const tileIcon = { H: <Icon name="home" size={22} />, h: <Icon name="star" size={20} />, R: <Icon name="alert" size={20} />, '#': '' };
-const moves = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1] };
+const moves = { arrowup: [-1, 0], arrowdown: [1, 0], arrowleft: [0, -1], arrowright: [0, 1], w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1] };
 const hintFor = { '#': 'A wall. Try another way.', R: 'Risky spot! Find another way, and ask a trusted adult when unsure.' };
 
 export default function SafePathMaze({ onFinish }) {
@@ -63,7 +63,7 @@ export default function SafePathMaze({ onFinish }) {
 
   useEffect(() => {
     const handler = (event) => {
-      const step = moves[event.key];
+      const step = moves[event.key.toLowerCase()];
       if (!step) return;
       event.preventDefault();
       move(...step);
@@ -76,7 +76,7 @@ export default function SafePathMaze({ onFinish }) {
 
   return <section className="game-board safe-path">
     <div className="game-progress"><span><Icon name="heart" size={15} /> {hearts} hearts left</span><span><Icon name="star" size={15} /> {collected.size} of {totalHelpers} helpers</span></div>
-    <div className="maze" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }} role="img" aria-label="Maze board">
+    <div className="maze" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }} role="img" aria-label={`Maze board. Buddy is at row ${pos.r + 1}, column ${pos.c + 1}. ${hearts} hearts left and ${collected.size} of ${totalHelpers} trusted helpers collected.`}>
       {grid.flat().map(({ cell, r, c }) => {
         const isBuddy = pos.r === r && pos.c === c;
         const isCollected = cell === 'h' && collected.has(`${r},${c}`);
@@ -87,11 +87,11 @@ export default function SafePathMaze({ onFinish }) {
       })}
     </div>
     <p className="game-message" aria-live="polite">{message}</p>
-    {status === 'lost' ? <button className="button" onClick={restart}>Try again <Icon name="refresh" size={15} /></button> : <div className="dpad" aria-label="Move buddy">
-      <span /><button aria-label="Up" onClick={() => move(-1, 0)}><Icon name="arrowUp" size={18} /></button><span />
-      <button aria-label="Left" onClick={() => move(0, -1)}><Icon name="arrowLeft" size={18} /></button><span />
-      <button aria-label="Right" onClick={() => move(0, 1)}><Icon name="arrowRight" size={18} /></button>
-      <span /><button aria-label="Down" onClick={() => move(1, 0)}><Icon name="arrowDown" size={18} /></button><span />
+    {status === 'lost' ? <button type="button" className="button" onClick={restart}>Try again <Icon name="refresh" size={15} /></button> : <div className="dpad" role="group" aria-label="Move buddy">
+      <span /><button type="button" aria-label="Move up" onClick={() => move(-1, 0)}><Icon name="arrowUp" size={18} /></button><span />
+      <button type="button" aria-label="Move left" onClick={() => move(0, -1)}><Icon name="arrowLeft" size={18} /></button><span />
+      <button type="button" aria-label="Move right" onClick={() => move(0, 1)}><Icon name="arrowRight" size={18} /></button>
+      <span /><button type="button" aria-label="Move down" onClick={() => move(1, 0)}><Icon name="arrowDown" size={18} /></button><span />
     </div>}
     <p className="game-hint">Use the arrow keys, WASD, or the buttons to move.</p>
   </section>;

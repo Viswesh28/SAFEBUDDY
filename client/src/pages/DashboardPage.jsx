@@ -2,18 +2,36 @@ import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
-import ProgressRing from '../components/ProgressRing';
 import Icon, { categoryIcon } from '../components/Icon';
 
 export default function DashboardPage() {
   const { token, user } = useAuth();
-  const [data, setData] = useState(null); const [lessons, setLessons] = useState([]); const [error, setError] = useState('');
-  useEffect(() => { Promise.all([api('/progress/me', { token }), api('/lessons', { token })]).then(([progress, lessonData]) => { setData(progress); setLessons(lessonData.lessons); }).catch((err) => setError(err.message)); }, [token]);
-  const next = useMemo(() => lessons.find((lesson) => !data?.user?.completedLessonIds.includes(lesson.id)) || lessons[0], [lessons, data]);
+  const [data, setData] = useState(null);
+  const [lessons, setLessons] = useState([]);
+  const [games, setGames] = useState([]);
+  const [collection, setCollection] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    Promise.all([api('/progress/me', { token }), api('/lessons', { token }), api('/games', { token }), api('/collection', { token })])
+      .then(([progress, lessonData, gameData, collectionData]) => {
+        setData(progress);
+        setLessons(lessonData.lessons);
+        setGames(gameData.games);
+        setCollection(collectionData);
+      })
+      .catch((err) => setError(err.message));
+  }, [token]);
+  const tryNext = useMemo(() => {
+    const lesson = lessons.find((item) => !data?.user?.completedLessonIds.includes(item.id));
+    if (lesson) return { title: lesson.title, description: lesson.summary, to: `/learn/${lesson.id}`, icon: categoryIcon[lesson.category] || 'book', label: `Lesson · ${lesson.category}` };
+    const game = games.find((item) => !item.completed);
+    if (game) return { title: game.title, description: game.description, to: `/games/${game.id}`, icon: 'game', label: 'Safety game' };
+    return null;
+  }, [lessons, games, data]);
   if (error) return <section className="error-card"><h2>We couldn’t load your journey.</h2><p>{error}</p></section>;
-  if (!data) return <main className="loading-page"><span className="spinner" /> Preparing your learning path…</main>;
+  if (!data || !collection) return <main className="loading-page"><span className="spinner" /> Preparing your learning path…</main>;
   const completion = data.stats.totalLessons ? Math.round((data.stats.completedLessons / data.stats.totalLessons) * 100) : 0;
-  const nextIcon = categoryIcon[next?.category] || 'book';
+  const earnedBadges = collection.badges.filter((badge) => badge.earned).length;
   return <>
     <section className="welcome-row">
       <div>
@@ -28,24 +46,22 @@ export default function DashboardPage() {
     </section>
 
     <section className="dashboard-grid">
-      <article className="continue-card">
-        <div className="continue-card__content">
-          <span className="pill">{next ? `Up next · ${next.category}` : 'All lessons complete'}</span>
-          <h2>{next?.title || 'Well done, learner'}</h2>
-          <p>{next?.summary || 'You have finished every lesson. Try the safety games or revisit a lesson any time.'}</p>
-          {next
-            ? <Link className="button" to={`/learn/${next.id}`}>Continue learning <Icon name="arrowRight" size={16} /></Link>
-            : <Link className="button" to="/games">Play safety games <Icon name="arrowRight" size={16} /></Link>}
+      <article className="try-next-card">
+        <div className="try-next-card__content">
+          <span className="pill">{tryNext?.label || 'You did it!'}</span>
+          <h2>Try this next</h2>
+          <h3>{tryNext?.title || 'All caught up'}</h3>
+          <p>{tryNext?.description || 'You have completed every lesson and game. Revisit any activity whenever you like.'}</p>
+          <Link className="button" to={tryNext?.to || '/games'}>{tryNext ? 'Start now' : 'Explore games'} <Icon name="arrowRight" size={16} /></Link>
         </div>
-        <div className="continue-card__art" aria-hidden="true"><Icon name={nextIcon} size={56} /></div>
+        <div className="try-next-card__art" aria-hidden="true"><Icon name={tryNext?.icon || 'check'} size={48} /></div>
       </article>
-      <article className="journey-card">
-        <p className="eyebrow">Your journey</p>
-        <ProgressRing value={completion} size={112} stroke={8} label={`${completion}%`} />
-        <b>{data.stats.completedLessons} of {data.stats.totalLessons} lessons</b>
-        <p>Keep going at your own pace.</p>
-        <Link to="/learn" className="text-action">View all lessons <Icon name="arrowRight" size={14} /></Link>
-      </article>
+      <Link to="/cards" className="my-collection-card">
+        <div className="my-collection-card__heading"><span className="stat-icon"><Icon name="award" size={19} /></span><div><span className="eyebrow">My Collection</span><h2>{collection.level.icon} {collection.level.title}</h2></div></div>
+        <div className="my-collection-card__progress-label"><b>{data.user.xp} XP</b><span>{collection.level.xpToNext ? `${collection.level.xpToNext} XP to go` : 'Top level reached'}</span></div>
+        <div className="my-collection-card__progress" role="progressbar" aria-label="Progress to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow={collection.level.percent}><span style={{ width: `${collection.level.percent}%` }} /></div>
+        <div className="my-collection-card__footer"><span>{earnedBadges} of {collection.badges.length} badges</span><span className="text-action">View collection <Icon name="arrowRight" size={14} /></span></div>
+      </Link>
     </section>
 
     <section className="stat-grid">

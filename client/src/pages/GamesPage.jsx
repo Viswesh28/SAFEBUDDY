@@ -33,10 +33,13 @@ export default function GamesPage() {
       {games.map((game) => <Link key={game.id} to={`/games/${game.id}`} className="game-card">
         <div className="game-card__top">
           <span className="game-card__icon"><Icon name="game" size={20} /></span>
-          {game.completed ? <span className="game-card__done"><Icon name="check" size={13} /> Played</span> : <span className="game-card__xp"><Icon name="zap" size={13} /> +{game.xpReward} XP</span>}
+          <div className="game-card__status">
+            {game.isNew && <span className="game-card__new">New</span>}
+            {game.completed ? <span className="game-card__done"><Icon name="check" size={13} /> Played</span> : <span className="game-card__xp"><Icon name="zap" size={13} /> +{game.xpReward} XP</span>}
+          </div>
         </div>
         <div className="game-card__body">
-          <div className="lesson-meta"><span><Icon name="clock" size={13} /> {game.minutes} min</span><span>{game.completed ? 'Practice' : 'New'}</span></div>
+          <div className="lesson-meta"><span><Icon name="clock" size={13} /> {game.minutes} min</span>{game.completed && <span>Practice</span>}</div>
           <h2>{game.title}</h2>
           <p>{game.description}</p>
           <span className="lesson-link">{game.completed ? 'Play again' : 'Play now'} <Icon name="arrowRight" size={14} /></span>

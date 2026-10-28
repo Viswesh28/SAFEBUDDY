@@ -1,0 +1,42 @@
+[
+  {
+    "statement": "Every child has a right to learn and can ask for help when school feels difficult.",
+    "answer": true,
+    "explain": "True. Learning matters, and a teacher, parent, caregiver, or another trusted adult can help you find support."
+  },
+  {
+    "statement": "Only children with perfect marks deserve to stay in school.",
+    "answer": false,
+    "explain": "False. Every child deserves a chance to learn. If school feels difficult, tell a trusted adult so they can help."
+  },
+  {
+    "statement": "If a secret makes you feel scared or uncomfortable, you can tell a trusted adult.",
+    "answer": true,
+    "explain": "True. You do not have to keep a secret that worries you. A trusted adult can listen and help."
+  },
+  {
+    "statement": "You should keep quiet if someone asks you to keep a secret about your body.",
+    "answer": false,
+    "explain": "False. You can tell a trusted adult. It is never your fault when someone asks you to keep an unsafe secret."
+  },
+  {
+    "statement": "Children need time for school, rest, play, and growing up safely.",
+    "answer": true,
+    "explain": "True. Children deserve time to learn, rest, and play. Tell a trusted adult if a child seems unsafe or cannot go to school."
+  },
+  {
+    "statement": "If harmful work keeps a child from school, it is the child’s fault.",
+    "answer": false,
+    "explain": "False. It is never a child’s fault. A trusted adult can help find safe support for the child."
+  },
+  {
+    "statement": "Keeping your password private is one way to stay safer online.",
+    "answer": true,
+    "explain": "True. Do not share passwords with strangers. If an online message worries you, show it to a trusted adult."
+  },
+  {
+    "statement": "You have to reply to an online message that makes you feel uneasy.",
+    "answer": false,
+    "explain": "False. You can stop replying and tell a trusted adult. In an immediate emergency, call 112 or ask an adult nearby to call."
+  }
+]

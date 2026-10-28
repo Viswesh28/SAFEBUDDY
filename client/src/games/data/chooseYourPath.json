@@ -1,0 +1,55 @@
+{
+  "startId": "friend-request",
+  "nodes": [
+    {
+      "id": "friend-request",
+      "text": "You get a friend request from an unknown gamer who says they play the same game as you.",
+      "choices": [
+        { "label": "Accept the request and start chatting", "next": "personal-details" },
+        { "label": "Pause and ask a trusted adult what to do", "next": "trusted-adult" }
+      ]
+    },
+    {
+      "id": "personal-details",
+      "text": "The gamer asks which school you go to and what area you live in.",
+      "choices": [
+        { "label": "Share my school and area", "next": "shared-details" },
+        { "label": "Say I do not share personal details online", "next": "keep-secret" }
+      ]
+    },
+    {
+      "id": "trusted-adult",
+      "text": "A trusted adult reminds you that unknown people online may not be who they say they are.",
+      "choices": [
+        { "label": "Do not reply, save the messages, and tell the trusted adult", "next": "safe-ending" },
+        { "label": "Accept the request without sharing details", "next": "personal-details" }
+      ]
+    },
+    {
+      "id": "keep-secret",
+      "text": "The gamer says, “Keep our chat secret. Do not tell any grown-ups.”",
+      "choices": [
+        { "label": "Stop replying, save the messages, and tell a trusted adult", "next": "safe-ending" },
+        { "label": "Keep chatting because it is a secret", "next": "secret-ending" }
+      ]
+    },
+    {
+      "id": "safe-ending",
+      "text": "You chose to protect your personal information and ask for support.",
+      "outcome": "great",
+      "message": "That was a strong choice. A trusted adult can help you report a cybercrime through 1930. CHILDLINE 1098 is free, 24 hours, and call 112 or ask an adult nearby to call if you are in immediate danger."
+    },
+    {
+      "id": "shared-details",
+      "text": "You shared some personal details, but you can still get help now.",
+      "outcome": "okay",
+      "message": "You are not in trouble, and it is never your fault if someone asks for personal details. Stop replying, save the messages, and tell a trusted adult; they can contact 1930 for cybercrime help. CHILDLINE 1098 is free, 24 hours, and call 112 if you are in immediate danger."
+    },
+    {
+      "id": "secret-ending",
+      "text": "Keeping a worrying online chat secret can make it harder to get help.",
+      "outcome": "try-again",
+      "message": "You deserve support and can choose a safer path next time. Stop replying, save the messages, and tell a trusted adult; they can contact 1930 for cybercrime help. CHILDLINE 1098 is free, 24 hours, and call 112 if you are in immediate danger."
+    }
+  ]
+}

@@ -34,7 +34,9 @@ export default function GamePage() {
       const data = await api(`/games/${gameId}/complete`, { method: 'POST', token, body: { score, total } });
       setUser(data.user);
       setResult(data);
-      if (data.score / data.total >= 0.5) import('canvas-confetti').then(({ default: confetti }) => confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } }));
+      if (data.score / data.total >= 0.5 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        import('canvas-confetti').then(({ default: confetti }) => confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } }));
+      }
     } catch (err) {
       setSaveError(err.message);
     } finally {
@@ -54,12 +56,22 @@ export default function GamePage() {
       <span className="eyebrow">{game.title.toUpperCase()}</span>
       <h1>{perfect ? 'Perfect play!' : 'Well played!'}</h1>
       <p>You scored {result.score} out of {result.total}.</p>
+      {game.id === 'myth-buster' && <p className="muted">If something worries you, tell a trusted adult. CHILDLINE 1098 is free, 24 hours.</p>}
       <div className="reward-row">
         {result.firstCompletion ? <span><Icon name="zap" size={14} /> +{result.xpEarned} XP</span> : <span>Played again for practice</span>}
         <span>Total XP: {result.user.xp}</span>
       </div>
       {!result.firstCompletion && <p className="muted">You already earned XP for this game. Keep practising for the confidence it builds!</p>}
-      {result.newBadges.length > 0 && <div className="badge-unlocked">{result.newBadges.map((badge) => <span key={badge.key}>{badge.icon} New badge: <b>{badge.title}</b></span>)}</div>}
+      {(result.newBadges?.length > 0 || result.levelUp) && <section className="result-achievements" aria-label="New achievements">
+        {result.newBadges?.map((badge) => <article className="result-achievement" key={badge.key}>
+          <span className="result-achievement__icon" aria-hidden="true">{badge.icon}</span>
+          <div><b>New badge!</b><p>{badge.title}</p></div>
+        </article>)}
+        {result.levelUp && <article className="result-achievement result-achievement--level">
+          <span className="result-achievement__icon" aria-hidden="true">{result.levelUp.card.icon}</span>
+          <div><b>Level up!</b><p>{result.levelUp.card.title}</p><Link to="/cards">See your collection <Icon name="arrowRight" size={14} /></Link></div>
+        </article>}
+      </section>}
       <div className="result-actions">
         <Link className="button" to="/games">More games <Icon name="arrowRight" size={16} /></Link>
         <button className="secondary-button" onClick={restart}>Play again</button>

@@ -12,6 +12,7 @@ const LessonPage = lazy(() => import('./pages/LessonPage'));
 const QuizPage = lazy(() => import('./pages/QuizPage'));
 const GamesPage = lazy(() => import('./pages/GamesPage'));
 const GamePage = lazy(() => import('./pages/GamePage'));
+const CardsPage = lazy(() => import('./pages/CardsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 
@@ -29,6 +30,8 @@ export default function App() {
         <Route path="/quiz/:lessonId" element={<QuizPage />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/games/:gameId" element={<GamePage />} />
+        <Route path="/cards" element={<CardsPage />} />
+        <Route path="/collection" element={<Navigate to="/cards" replace />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
       </Route>

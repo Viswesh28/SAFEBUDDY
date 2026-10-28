@@ -1,0 +1,61 @@
+{
+  "_comment": "Helpline details need verification before public release.",
+  "rounds": [
+  {
+    "worry": "Someone at school keeps hurting me on purpose and I do not know who to tell.",
+    "options": ["Keep it secret forever", "Tell a class teacher or school counsellor", "Reply angrily to the bully", "Post about it online"],
+    "answer": 1,
+    "explain": "A teacher or school counsellor can act on bullying. Telling a trusted adult is the right first step."
+  },
+  {
+    "worry": "Someone is hurt or in danger right now.",
+    "options": ["Wait and see if it passes", "Call 112 and tell a grown-up near you", "Send a message to a friend", "Take a photo for later"],
+    "answer": 1,
+    "explain": "112 is the single emergency number in India. Get help from people nearby straight away."
+  },
+  {
+    "worry": "I feel unsafe at home and need someone to talk to, any time of day.",
+    "options": ["CHILDLINE 1098 (free, 24 hours)", "Post about it on social media", "Wait until tomorrow", "Ask an online stranger for advice"],
+    "answer": 0,
+    "explain": "CHILDLINE 1098 is a free, 24-hour helpline for children in India who need care, protection, or someone to talk to."
+  },
+  {
+    "worry": "An unknown adult online asked me to keep our chats a secret.",
+    "options": ["Keep chatting, it is a secret", "Stop replying, keep the messages, and tell a parent or trusted adult", "Send them a photo to be friendly", "Delete everything and say nothing"],
+    "answer": 1,
+    "explain": "Stop replying, keep the messages as evidence, and tell a trusted adult. Do not delete them."
+  },
+  {
+    "worry": "A profile that looks like a game account asks me to send money or share a code to claim a prize.",
+    "options": ["Share the code quickly", "Ask the profile to prove it is real", "Stop replying, save the messages, and tell a trusted adult who can call 1930", "Send the profile to every friend"],
+    "answer": 2,
+    "explain": "A trusted adult can help with a fake profile or online fraud. India’s cybercrime helpline is 1930.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "worry": "I have felt very sad or stressed for many days and it is hard to enjoy my usual activities.",
+    "options": ["Keep it to myself forever", "Try to handle it alone", "Wait without telling anyone", "Tell a trusted adult and ask them to contact Tele-MANAS 14416"],
+    "answer": 3,
+    "explain": "You deserve support when feelings are heavy for a long time. A trusted adult can listen and can help contact Tele-MANAS at 14416.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "worry": "I see another child being made to work instead of attending school.",
+    "options": ["Tell a trusted adult or contact CHILDLINE 1098", "Make fun of the child", "Ignore it", "Put myself in danger to fix it alone"],
+    "answer": 0,
+    "explain": "Children need time to learn and grow. Tell a trusted adult; CHILDLINE 1098 can also help children who need support.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "worry": "A child is told they cannot be admitted to school.",
+    "options": ["Give up on school", "Talk to a parent or teacher, and ask CHILDLINE 1098 for help if needed", "Keep it secret", "Blame the child"],
+    "answer": 1,
+    "explain": "Every child deserves a chance to learn. A parent, teacher, or trusted adult can help, and CHILDLINE 1098 can support children who need help.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  }
+  ]
+}

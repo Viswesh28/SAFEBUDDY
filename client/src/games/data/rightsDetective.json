@@ -1,0 +1,66 @@
+[
+  {
+    "story": "Aanya is excited to start school, and her family helps her speak to the school when she needs a place in class.",
+    "options": ["Right to education", "Right to play and rest", "Right to identity", "Right to be heard"],
+    "answer": "Right to education",
+    "explain": "This is the right to education: every child should have a chance to learn. This is protected by the Right to Education Act.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Kabir gets a message from someone he does not know that makes him uneasy. He stops replying and tells his aunt.",
+    "options": ["Right to be safe from harm", "Right to identity", "Right to play and rest", "Right to education"],
+    "answer": "Right to be safe from harm",
+    "explain": "This is the right to be safe from harm. Telling a trusted adult is a strong step; online safety is supported by the Information Technology Act.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Meera has time after school to rest, play badminton, and spend time with her friends.",
+    "options": ["Right to identity", "Right to be heard", "Right to play and rest", "Right to health"],
+    "answer": "Right to play and rest",
+    "explain": "This is the right to play and rest. The UN Convention on the Rights of the Child says children need time to grow, play, and recharge.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Arjun shares his ideas when his school asks students how to make the library more welcoming.",
+    "options": ["Right to be heard", "Right to be safe from harm", "Right to education", "Right to identity"],
+    "answer": "Right to be heard",
+    "explain": "This is the right to be heard: children can share their views about things that affect them. This is supported by the UN Convention on the Rights of the Child.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Zoya feels unwell at school, so she tells her teacher and visits the school nurse with help from a trusted adult.",
+    "options": ["Right to health", "Right to play and rest", "Right to identity", "Right to be heard"],
+    "answer": "Right to health",
+    "explain": "This is the right to health: children deserve care when they are unwell. This is supported by the UN Convention on the Rights of the Child.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Imran notices that his name is spelled incorrectly on a school form, and a teacher helps make sure it is written correctly.",
+    "options": ["Right to be included", "Right to identity", "Right to education", "Right to be safe from harm"],
+    "answer": "Right to identity",
+    "explain": "This is the right to identity: every child has a name and belongs. This is supported by the UN Convention on the Rights of the Child.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Tara uses a wheelchair, and her class plans an activity so she can join in with everyone else.",
+    "options": ["Right to be included", "Right to play and rest", "Right to be heard", "Right to identity"],
+    "answer": "Right to be included",
+    "explain": "This is the right to be included: every child should be welcomed and supported. The Right to Education Act supports inclusive learning.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  },
+  {
+    "story": "Dev is worried because older children keep asking him to work instead of going to class. He tells his teacher, who helps him find support.",
+    "options": ["Right to be safe from harm", "Right to identity", "Right to play and rest", "Right to be heard"],
+    "answer": "Right to be safe from harm",
+    "explain": "This is the right to be safe from harm and to keep learning. The Child Labour (Prohibition and Regulation) Act helps protect children from harmful work.",
+    "reviewStatus": "needs-review",
+    "lastReviewed": null
+  }
+]
