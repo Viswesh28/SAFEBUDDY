@@ -29,24 +29,37 @@ the script.
 
 ## Connecting the repository to Vercel
 
-Linking the Git repository makes Vercel build on every push and removes the need for the manual
-`create_deployment` step. It requires a GitHub **login connection** for the Vercel account, which
-only the account owner can authorise:
+This is a two-part setup, and the parts are independent:
 
-1. Vercel → **Account Settings → Authentication → Login Connections → Connect GitHub**, and grant
-   access to `Viswesh28/SAFEBUDDY`.
-2. Project **safebuddy → Settings → Git → Connect Git Repository**, choose the repository and the
-   `main` production branch.
-3. Keep the build command `bash bootstrap.sh` and the install command `echo using prebuilt
-   bootstrap`. The script detects the checkout and skips the tarball download.
+| Step | Where | State |
+| --- | --- | --- |
+| 1. GitHub **login connection** — authorises the Vercel account against GitHub | Account Settings → Authentication → Login Connections | ✅ Done (2026-10-30) |
+| 2. **Link the repository to the project** — installs the push webhook | Project `safebuddy` → Settings → Git → Connect Git Repository | ⬜ Outstanding |
 
-Until that is done, deploys are created with the Vercel API/connector (`create_deployment` with
-`bootstrap.sh` as the only file), which fetches the source from GitHub during the build.
+**What step 1 unlocked:** Vercel can now clone the repository itself. A Git-sourced deployment of
+`main` (`dpl_4hgNjQKskRK455qbXs5zxstBf2M8`, built from `main@e0a945b`) built and promoted
+successfully, and Vercel records the GitHub account on the deployment.
+
+**What step 2 still controls:** automatic deployments. Until the repository is linked, the project
+has no `gitRepository` and keeps `gitProviderOptions.createDeployments` disabled, so a push or a
+merged pull request does **not** start a deployment — verified by a merge that produced no
+deployment at its timestamp. Linking also lets Vercel build without `SOURCE_BRANCH`.
+
+To finish:
+
+1. Project **safebuddy → Settings → Git → Connect Git Repository**, choose `Viswesh28/SAFEBUDDY`
+   and set `main` as the production branch.
+2. Keep the build command `bash bootstrap.sh`, the install command `echo using prebuilt
+   bootstrap`, and the output directory `client/dist`. The script detects the checkout and skips
+   the tarball download, so no source changes are needed.
+
+Until then, deploys are created with the Vercel API/connector: `create_deployment` with
+`bootstrap.sh` as the only file (which fetches the source during the build), or with
+`git_source: { type: "github", ref: "main", repoId: 1389085101 }` now that step 1 is done.
 
 ## Why a Build Output API directory
 
-With no Git connection and no `vercel.json` in the uploaded file set, Vercel derives routes from
-the files on disk. That is not enough here: `/api/*` requests only reached the function for single
+With no `vercel.json` in an uploaded file set, Vercel derives routes from the files on disk. That is not enough here: `/api/*` requests only reached the function for single
 segment paths and every client route (`/signin`, `/learn/:id`, …) returned `404 NOT_FOUND`.
 
 [`scripts/buildVercelOutput.mjs`](../scripts/buildVercelOutput.mjs) writes `.vercel/output`
