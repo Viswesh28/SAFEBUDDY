@@ -37,19 +37,30 @@ let pool = null;
 
 const isLocalHost = (url) => /@(localhost|127\.0\.0\.1|0\.0\.0\.0)[:/]/.test(url);
 
-// Supabase needs TLS. `sslmode` in the URL always wins, because the driver understands it.
-const sslFor = (connectionString) => {
-  if (/[?&]sslmode=/i.test(connectionString)) return undefined;
-  return isLocalHost(connectionString) ? false : { rejectUnauthorized: false };
+// Supabase requires TLS. The pooler (Supavisor/PgBouncer) is fronted by a certificate that is
+// not in every host's CA bundle, so certificate verification is relaxed while the connection
+// stays encrypted. Pass an explicit `ssl` option to override.
+const sslFor = (connectionString) => (isLocalHost(connectionString) ? false : { rejectUnauthorized: false });
+
+// Removes sslmode from the URL: otherwise pg-connection-string turns it into `ssl: true`,
+// which re-enables strict verification and overrides the option below.
+const withoutSslMode = (connectionString) => {
+  try {
+    const parsed = new URL(connectionString);
+    parsed.searchParams.delete('sslmode');
+    return parsed.toString();
+  } catch {
+    return connectionString.replace(/([?&])sslmode=[^&]*/gi, '').replace(/[?&]$/, '');
+  }
 };
 
 export function createPool(connectionString, options = {}) {
   if (!connectionString || !/^postgres(ql)?:\/\//i.test(connectionString)) {
     throw new Error('SUPABASE_DB_URL must be a postgres:// or postgresql:// connection string.');
   }
-  const { ssl, ...rest } = options;
+  const { ssl, connectionString: _ignored, ...rest } = options;
   return new pg.Pool({
-    connectionString,
+    connectionString: withoutSslMode(connectionString),
     ssl: ssl ?? sslFor(connectionString),
     max: Number(process.env.PG_POOL_MAX) || 5,
     idleTimeoutMillis: 10_000,
