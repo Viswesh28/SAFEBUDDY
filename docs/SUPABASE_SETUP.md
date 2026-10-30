@@ -175,6 +175,7 @@ Serverless notes:
 | Tables exist but queries return nothing | You connected as `anon`/`authenticated`; the API needs the project's `postgres` role |
 | App works, data resets after deploy | `SUPABASE_DB_URL` is missing in production, so SQLite was used |
 | `password authentication failed` | Reset the database password in the dashboard and update the URL (the pooler needs the new password too) |
+| `SELF_SIGNED_CERT_IN_CHAIN` | The pooler's certificate is not in the host's CA bundle. The server already connects with TLS and verification relaxed; keep `sslmode=require` in the URL — it is stripped and handled in code |
 
 ## 9. Where the pieces live
 
