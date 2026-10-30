@@ -47,6 +47,7 @@ The starter curriculum covers:
 - MongoDB/Mongoose schemas for users, lessons, quizzes, and attempts
 - **Three storage backends:** Supabase Postgres (`SUPABASE_DB_URL`), MongoDB (`MONGO_URI`), or the zero-setup local SQLite fallback that keeps the platform working immediately with no configuration
 - **One service deployment:** Express serves the built React app and the API together (see [`render.yaml`](render.yaml) and [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md))
+- **Vercel deployment:** live demo at <https://safebuddy-livid.vercel.app>; build and routing details in [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md)
 - MongoDB auto-seeding for the same starter content when `MONGO_URI` is configured
 - Protected routes, password hashing with bcrypt, Helmet, CORS, and input validation
 
