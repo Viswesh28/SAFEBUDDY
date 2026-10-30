@@ -71,7 +71,13 @@ export default async function handler(request, response) {
     console.error('SafeBuddy API failed to start:', error);
     response.statusCode = 500;
     response.setHeader('content-type', 'application/json; charset=utf-8');
-    response.end(JSON.stringify({ message: 'The SafeBuddy API could not start. Please try again shortly.' }));
+    const body = { message: 'The SafeBuddy API could not start. Please try again shortly.' };
+    // Set SAFEBUDDY_DEBUG_API=1 in the hosting environment to include the failure reason in the
+    // response. Keep it off in production once the deployment is healthy.
+    if (process.env.SAFEBUDDY_DEBUG_API === '1') {
+      body.debug = { name: error?.name, code: error?.code, reason: error?.message, step: error?.step };
+    }
+    response.end(JSON.stringify(body));
     return;
   }
   return app(request, response);
