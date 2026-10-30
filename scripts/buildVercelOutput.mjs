@@ -52,6 +52,17 @@ import { app, initialiseApp } from './server/src/index.js';
 let ready;
 
 export default async function handler(request, response) {
+  // Routes in .vercel/output/config.json can only target a function by its exact path, so the
+  // original path arrives in the __original_path query parameter and is restored here before
+  // Express looks at the request.
+  const url = new URL(request.url, 'http://localhost');
+  const originalPath = url.searchParams.get('__original_path');
+  if (originalPath) {
+    url.searchParams.delete('__original_path');
+    const search = url.searchParams.toString();
+    request.url = \`\${originalPath}\${search ? \`?\${search}\` : ''}\`;
+  }
+
   try {
     ready ??= initialiseApp();
     await ready;
@@ -90,8 +101,9 @@ fs.writeFileSync(
     {
       version: 3,
       routes: [
-        // Keep the full request path ($1) so Express still sees /api/auth/login and friends.
-        { src: '/api/(.*)', dest: '/api/$1' },
+        // Functions can only be addressed by their exact path, so /api/* is rewritten to /api
+        // with the original path carried in a query parameter that the function restores.
+        { src: '/api(.*)', dest: '/api?__original_path=/api$1' },
         { handle: 'filesystem' },
         // Single-page app fallback.
         { src: '/(.*)', dest: '/index.html' }
