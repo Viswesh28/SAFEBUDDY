@@ -39,8 +39,11 @@ fs.mkdirSync(functionDir, { recursive: true });
 // Static client build.
 fs.cpSync(clientDist, staticDir, { recursive: true });
 
-// The API function: Express source plus its production dependencies.
-fs.cpSync(path.join(serverDir, 'src'), path.join(functionDir, 'server', 'src'), { recursive: true });
+// The API function: Express source, the SQL schema it applies on boot, and its dependencies.
+// Paths mirror the repository layout because the source resolves files relative to itself.
+for (const entry of ['src', 'db']) {
+  fs.cpSync(path.join(serverDir, entry), path.join(functionDir, 'server', entry), { recursive: true });
+}
 fs.copyFileSync(path.join(serverDir, 'package.json'), path.join(functionDir, 'server', 'package.json'));
 fs.cpSync(path.join(serverDir, 'node_modules'), path.join(functionDir, 'server', 'node_modules'), { recursive: true });
 
