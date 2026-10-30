@@ -10,3 +10,4 @@ server/data/*.local.json
 # SQLite database (generated on first start)
 server/data/*.sqlite
 server/data/*.sqlite-*
+.vercel/

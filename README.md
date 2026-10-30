@@ -45,7 +45,9 @@ The starter curriculum covers:
 - React + Vite frontend with React Router
 - Express REST API with JWT-based auth and role checks
 - MongoDB/Mongoose schemas for users, lessons, quizzes, and attempts
-- **Zero-setup demo mode:** if `MONGO_URI` is absent, the API uses a local SQLite database (created automatically) so the whole platform still works immediately
+- **Three storage backends:** Supabase Postgres (`SUPABASE_DB_URL`), MongoDB (`MONGO_URI`), or the zero-setup local SQLite fallback that keeps the platform working immediately with no configuration
+- **One service deployment:** Express serves the built React app and the API together (see [`render.yaml`](render.yaml) and [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md))
+- **Vercel deployment:** live demo at <https://safebuddy-livid.vercel.app>; build and routing details in [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md)
 - MongoDB auto-seeding for the same starter content when `MONGO_URI` is configured
 - Protected routes, password hashing with bcrypt, Helmet, CORS, and input validation
 
@@ -54,30 +56,39 @@ The starter curriculum covers:
 ### Prerequisites
 
 - Node.js 22.13+ (or 24 LTS) and npm — the server uses Node's built-in SQLite, so no native build step is needed
-- Optional: MongoDB 7+ (or a MongoDB Atlas connection string) for database-backed persistence
+- Optional: a Supabase project (Postgres) or MongoDB 7+ for hosted, persistent storage
 
-### Installation
+### Installation and start
 
-```bash
-git clone https://github.com/YOUR-USERNAME/safebuddy.git
-cd safebuddy
-npm run install:all
-```
+**Requirements:** Node.js 22.13 or newer (Node 24 LTS is also supported) and npm. The default demo uses Node's built-in SQLite, so MongoDB is not required.
 
-Create `server/.env` from the example:
+1. Clone the repository and enter its directory:
 
-```bash
-cp server/.env.example server/.env
-```
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/safebuddy.git
+   cd safebuddy
+   ```
 
-Start the client and API together:
+2. Install all dependencies from the repository root. This installs the root development tools plus the server and client packages:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run install:all
+   ```
 
-- Client: `http://localhost:5173`
-- API health check: `http://localhost:5000/api/health`
+3. Start the frontend and API together:
+
+   ```bash
+   npm run dev
+   ```
+
+   The first run seeds the local SQLite database and demo accounts automatically. No `.env` file or database setup is needed for the default demo.
+
+4. Open the app and check the API:
+
+   - Client: `http://localhost:5173`
+   - API health check: `http://localhost:5000/api/health`
+
+To use a hosted database, copy `server/.env.example` to `server/.env`, set either `SUPABASE_DB_URL` (recommended, see [Supabase Postgres mode](#supabase-postgres-mode-recommended-for-deployment)) or `MONGO_URI`, and provide a unique `JWT_SECRET`. Leave both unset to use the local SQLite demo.
 
 ### Demo accounts
 
@@ -90,9 +101,38 @@ The learner sign-in screen also includes a **Use learner demo account** shortcut
 
 ## Database modes
 
+Storage is chosen at boot in this order: `MONGO_URI` → `SUPABASE_DB_URL` → local SQLite.
+
 ### Local SQLite mode (default)
 
-No database configuration is required. When the server starts without `MONGO_URI`, it creates `server/data/safebuddy.sqlite` (SQLite) with starter content and demo users. The file is intentionally ignored by Git; set `SQLITE_PATH` to change its location.
+No database configuration is required. When the server starts without `MONGO_URI` or `SUPABASE_DB_URL`, it creates `server/data/safebuddy.sqlite` (SQLite) with starter content and demo users. The file is intentionally ignored by Git; set `SQLITE_PATH` to change its location. This is ideal for local demos; on hosts without a persistent disk the file disappears on redeploy, so use a hosted database for anything shared.
+
+### Supabase Postgres mode (recommended for deployment)
+
+1. Create a Supabase project and copy the **transaction pooler** connection string
+   (port `6543`, keep `?sslmode=require`).
+2. Set it in `server/.env`:
+
+   ```dotenv
+   SUPABASE_DB_URL=postgresql://postgres.[ref]:[password]@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require
+   ```
+
+3. Apply the schema, seed the content, and create an admin:
+
+   ```bash
+   npm run db:migrate --prefix server
+   npm run db:seed --prefix server
+   npm run db:admin --prefix server -- --email=you@example.org --password='a-long-unique-password'
+   ```
+
+The server also applies `server/db/schema.sql` and seeds the starter content automatically on
+first boot. `GET /api/health` reports the active backend as `supabase`.
+
+- `npm run test:db --prefix server` runs the Postgres integration tests when
+  `TEST_SUPABASE_DB_URL` is set (they are skipped otherwise).
+- Full step-by-step guide: [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).
+- Unlike the SQLite demo, production does **not** seed demo accounts, so `db:admin` is how
+  the first admin account is created.
 
 ### MongoDB mode
 
@@ -148,11 +188,13 @@ safebuddy/
 │       ├── pages/           # Learner and admin views
 │       └── utils/           # API client
 ├── server/                  # Express API
+│   ├── db/schema.sql        # Postgres schema for Supabase deployments
 │   └── src/
 │       ├── middleware/      # JWT and role guards
 │       ├── models/          # Mongoose schemas
 │       ├── routes/          # Auth, lessons, quizzes, progress
-│       └── services/        # Seed content and storage repository
+│       ├── scripts/         # Migrate, seed and admin bootstrap commands
+│       └── services/        # Seed content and storage repositories
 ├── docs/                    # Product brief and architecture notes
 ├── .env.example
 └── package.json
@@ -182,6 +224,9 @@ Automated checks:
 
 ```bash
 npm test --prefix server   # XP, streak, badge and game-reward rules (unit tests)
+
+# Postgres integration tests (skipped unless a disposable database is provided)
+TEST_SUPABASE_DB_URL='postgresql://...' npm run test:db --prefix server
 ```
 
 The API and the browser UI have also been exercised end to end: sign-in for learner and admin, lesson reading, quiz scoring and XP, game completion and replay rules, badges, progress pages, admin quiz additions, and the removed leaderboard route.
@@ -190,11 +235,13 @@ The API and the browser UI have also been exercised end to end: sign-in for lear
 
 This academic MVP provides a strong functional starting point. Before a public release, add:
 
-1. Expert legal and child-safeguarding review of every content item, translated string, and external support number.
-2. A verified age-assurance, parental-consent, privacy, moderation, incident-response, and data-retention design.
-3. Rate limiting, CSRF strategy where relevant, audit logging, stronger production validation, tests, and monitoring.
-4. A dedicated CMS/question editor that supports multi-question quiz editing, draft review, publishing workflow, and versioning.
-5. Accessibility testing with real learners, educators, and diverse language communities; then add approved multilingual translations.
+1. Deploy behind HTTPS with a hosted Postgres database — [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md)
+   covers Supabase plus `render.yaml` — and create the first admin with `npm run db:admin`.
+2. Expert legal and child-safeguarding review of every content item, translated string, and external support number.
+3. A verified age-assurance, parental-consent, privacy, moderation, incident-response, and data-retention design.
+4. Rate limiting shared across instances, CSRF strategy where relevant, audit logging, stronger production validation, tests, and monitoring.
+5. A dedicated CMS/question editor that supports multi-question quiz editing, draft review, publishing workflow, and versioning.
+6. Accessibility testing with real learners, educators, and diverse language communities; then add approved multilingual translations.
 
 ## Source material
 

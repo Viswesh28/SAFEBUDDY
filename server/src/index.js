@@ -34,6 +34,10 @@ const authLimiter = rateLimit({
   handler: (req, res) => res.status(429).json({ message: 'Too many sign-in attempts. Please wait 15 minutes and try again.' })
 });
 
+// Hosts such as Render, Railway and Vercel terminate TLS and forward the real client IP in
+// X-Forwarded-For. Without this, express-rate-limit counts the proxy and throttles everyone.
+app.set('trust proxy', 1);
+
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({ origin(origin, callback) {
   if (!origin || configuredOrigins.includes(origin)) return callback(null, true);
@@ -81,7 +85,9 @@ export async function startServer() {
   return app.listen(port, '0.0.0.0', () => console.log(`SafeBuddy API running on port ${port}`));
 }
 
-if (process.env.NODE_ENV !== 'test') {
+// On serverless hosts (Vercel sets VERCEL=1) the platform owns the listener, so the app is
+// exported for api/index.mjs instead of binding a port here.
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   startServer().catch((error) => {
     console.error('Could not start SafeBuddy:', error);
     process.exit(1);
