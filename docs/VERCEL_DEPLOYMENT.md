@@ -15,13 +15,33 @@ Everything is produced by [`bootstrap.sh`](../bootstrap.sh), which is the projec
 Command**. Vercel's *Install Command* is set to `echo using prebuilt bootstrap` so the platform
 does not try to install dependencies before the source exists.
 
-`bootstrap.sh`:
+`bootstrap.sh` works in both deployment modes:
 
-1. downloads the repository tarball from `codeload.github.com` (the project has no Git
-   connection, so the build fetches the code itself);
+1. **source** — if the repository is already checked out (Git-connected project) it builds what is
+   there; otherwise it downloads the tarball of `SOURCE_BRANCH` (default `main`) from
+   `codeload.github.com`, so a project without a Git connection still builds the right code;
 2. `npm run install:all` and `npm run build` — Vite build into `client/dist`;
 3. `npm install --omit=dev --prefix server` — production dependencies only;
 4. `node scripts/buildVercelOutput.mjs` — assembles the Build Output API directory.
+
+Set the `SOURCE_BRANCH` environment variable in Vercel to build a different branch without editing
+the script.
+
+## Connecting the repository to Vercel
+
+Linking the Git repository makes Vercel build on every push and removes the need for the manual
+`create_deployment` step. It requires a GitHub **login connection** for the Vercel account, which
+only the account owner can authorise:
+
+1. Vercel → **Account Settings → Authentication → Login Connections → Connect GitHub**, and grant
+   access to `Viswesh28/SAFEBUDDY`.
+2. Project **safebuddy → Settings → Git → Connect Git Repository**, choose the repository and the
+   `main` production branch.
+3. Keep the build command `bash bootstrap.sh` and the install command `echo using prebuilt
+   bootstrap`. The script detects the checkout and skips the tarball download.
+
+Until that is done, deploys are created with the Vercel API/connector (`create_deployment` with
+`bootstrap.sh` as the only file), which fetches the source from GitHub during the build.
 
 ## Why a Build Output API directory
 
